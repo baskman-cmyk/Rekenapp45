@@ -72,15 +72,27 @@
             align-self: flex-start; margin-bottom: 15px;
         }
 
+        .nav-right-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
         .score-badge {
-            background: #fef3c7; color: #d97706; padding: 10px 18px;
-            border-radius: 30px; font-weight: 800; font-size: 16px; border: 2px solid #fde68a;
+            background: #fef3c7; color: #d97706; padding: 8px 16px;
+            border-radius: 30px; font-weight: 800; font-size: 15px; border: 2px solid #fde68a;
+        }
+
+        .btn-reset {
+            background: transparent; border: none; color: #ef4444; font-size: 11px;
+            font-weight: 700; cursor: pointer; text-decoration: underline;
         }
 
         .view { display: none; flex-direction: column; flex: 1; padding: 24px; }
         .view.active { display: flex; }
 
-        .main-title { font-size: 20px; font-weight: 800; margin: 10px 0 16px 0; display: flex; align-items: center; gap: 8px; }
+        .main-title { font-size: 20px; font-weight: 800; margin: 16px 0 12px 0; display: flex; align-items: center; gap: 8px; }
         
         /* Selectie Kaarten */
         .config-card {
@@ -120,9 +132,9 @@
         .item-tile.selected .checkbox-mock { background: #2563eb; border-color: #2563eb; }
         .item-tile.selected .checkbox-mock::after { content: "✓"; }
 
-        .choice-group { display: flex; gap: 10px; width: 100%; }
+        .choice-group { display: flex; gap: 8px; width: 100%; }
         .choice-btn {
-            flex: 1; padding: 14px; background: #f1f5f9; border: 2px solid transparent;
+            flex: 1; padding: 14px 6px; background: #f1f5f9; border: 2px solid transparent;
             border-radius: var(--radius-md); font-weight: 800; font-size: 14px; cursor: pointer; text-align: center;
         }
         .choice-btn.active { background: #1e293b; color: white; }
@@ -160,11 +172,19 @@
         .som-card.correct { border-color: #10b981; background: #f0fdf4; }
         .som-card.incorrect { border-color: #ef4444; background: #fef2f2; }
 
-        /* Voortgang Dashboard */
-        .stats-block { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 16px; overflow-x: auto; margin-top: 10px; }
+        /* Voortgang & Medailles Dashboard */
+        .stats-block { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 16px; overflow-x: auto; margin-bottom: 15px; }
         .stats-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
         .stats-table th, .stats-table td { padding: 12px 10px; border-bottom: 1px solid var(--border); }
         .stats-table th { font-weight: 800; color: var(--text-muted); }
+
+        .medal-showcase {
+            display: flex; gap: 8px; justify-content: flex-start;
+        }
+        .medal-icon {
+            font-size: 18px; filter: grayscale(100%); opacity: 0.3; transition: all 0.3s;
+        }
+        .medal-icon.earned { filter: grayscale(0%); opacity: 1; transform: scale(1.1); }
 
         .eval-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 32px 20px; text-align: center; }
         .safe-margin { margin-bottom: 24px; }
@@ -180,7 +200,10 @@
             <h1 id="nav-title">Rekenen Groep 4/5</h1>
             <p id="nav-sub">Stel je eigen werkblad samen</p>
         </div>
-        <div class="score-badge">🏆 <span id="globalXpDisplay">0</span> pnt</div>
+        <div class="nav-right-box">
+            <div class="score-badge">🏆 <span id="globalXpDisplay">0</span> pnt</div>
+            <button class="btn-reset" onclick="resetPunten()">Reset punten ↩️</button>
+        </div>
     </div>
 
     <!-- VIEW 1: CONFIGURATIE (HOOFDMENU) -->
@@ -232,8 +255,9 @@
 
         <!-- Stap 3: Aantal vragen -->
         <div class="config-card">
-            <h4>3. Aantal opdrachten op je werkblad:</h4>
+            <h4>3. Aantal opdrachten per gekozen onderdeel:</h4>
             <div class="choice-group">
+                <button class="choice-btn" id="cnt-5" onclick="setAantal(5)">5 Vragen</button>
                 <button class="choice-btn active" id="cnt-10" onclick="setAantal(10)">10 Vragen</button>
                 <button class="choice-btn" id="cnt-15" onclick="setAantal(15)">15 Vragen</button>
                 <button class="choice-btn" id="cnt-20" onclick="setAantal(20)">20 Vragen</button>
@@ -242,16 +266,15 @@
 
         <button class="btn-action safe-margin" onclick="genereerWerkblad()">Genereer Werkblad 🚀</button>
 
-        <div class="main-title">Mijn Voortgang per Niveau 📊</div>
+        <div class="main-title">Voortgang & Medailles 📊🎖️</div>
         <div class="stats-block">
             <table class="stats-table">
                 <thead>
                     <tr>
                         <th>Niveau</th>
-                        <th>Werkbladen</th>
-                        <th>Sommen</th>
-                        <th>Goed</th>
+                        <th>Bladen</th>
                         <th>Gem. Score</th>
+                        <th>Medailles</th>
                     </tr>
                 </thead>
                 <tbody id="statsTableBody"></tbody>
@@ -270,7 +293,7 @@
         <button class="btn-action safe-margin" id="btnNaarResultaat" style="background:#f59e0b; display:none;" onclick="gaNaarEvaluatie()">Bekijk Resultaat 🏆</button>
     </div>
 
-    <!-- VIEW 3: EVALUATIE / UTKOMST -->
+    <!-- VIEW 3: EVALUATIE / UITKOMST -->
     <div id="view-resultaat" class="view">
         <div class="main-title">Resultaat 🌟</div>
         <div class="eval-card safe-margin">
@@ -286,14 +309,14 @@
 <script>
     // State management
     let appState = {
-        niveau: 'b4', // b4 = Begin G4, m4 = Midden G4, g5 = Groep 5
+        niveau: 'b4',
         onderdelen: ['tafels', 'optellen'],
         aantal: 10,
         globalXp: parseInt(localStorage.getItem('rkn_g45_xp')) || 0,
         stats: JSON.parse(localStorage.getItem('rkn_g45_stats')) || {
-            b4: { bladen: 0, totaal: 0, goed: 0 },
-            m4: { bladen: 0, totaal: 0, goed: 0 },
-            g5: { bladen: 0, totaal: 0, goed: 0 }
+            b4: { bladen: 0, totaal: 0, goed: 0, hoogstePerc: 0 },
+            m4: { bladen: 0, totaal: 0, goed: 0, hoogstePerc: 0 },
+            g5: { bladen: 0, totaal: 0, goed: 0, hoogstePerc: 0 }
         }
     };
 
@@ -337,6 +360,14 @@
         window.scrollTo(0,0);
     }
 
+    function resetPunten() {
+        if(confirm("Weet je zeker dat je je score-punten op 0 wilt zetten? Je voortgang en behaalde medailles blijven bewaard!")) {
+            appState.globalXp = 0;
+            localStorage.setItem('rkn_g45_xp', 0);
+            document.getElementById('globalXpDisplay').innerText = 0;
+        }
+    }
+
     function gaNaarMenu() {
         document.getElementById('nav-title').innerText = "Rekenen Groep 4/5";
         document.getElementById('nav-sub').innerText = "Stel je eigen werkblad samen";
@@ -353,13 +384,11 @@
         switch (onderdeel) {
             case 'tafels':
                 if (nv === 'b4') {
-                    // Tafels 2, 3, 4, 5, 10
                     let tfls = [2, 3, 4, 5, 10];
                     let t = tfls[Math.floor(Math.random()*tfls.length)];
                     let f = Math.floor(Math.random()*9)+1;
                     vraag = `${f} × ${t} =`; antwoord = (f*t).toString();
                 } else if (nv === 'm4') {
-                    // Tafels 1 t/m 10 volledig gemengd of toepassen
                     let t = Math.floor(Math.random()*10)+1;
                     let f = Math.floor(Math.random()*10)+1;
                     if(Math.random() > 0.7) {
@@ -369,7 +398,6 @@
                     }
                     antwoord = (f*t).toString();
                 } else {
-                    // Groep 5: Uitbreiding naar 11 t/m 15 & tientallen
                     if (Math.random() > 0.5) {
                         let t = [11, 12, 13, 14, 15][Math.floor(Math.random()*5)];
                         let f = Math.floor(Math.random()*9)+2;
@@ -384,7 +412,6 @@
 
             case 'optellen':
                 if (nv === 'b4') {
-                    // Tot 100 (tientallen, eenheden, aanvullen)
                     if (Math.random() > 0.5) {
                         let a = [20, 30, 40, 50][Math.floor(Math.random()*4)];
                         let b = Math.floor(Math.random()*40)+11;
@@ -395,12 +422,10 @@
                         vraag = `${a} + ${b} =`; antwoord = (a+b).toString();
                     }
                 } else if (nv === 'm4') {
-                    // Tot 1.000 onder elkaar of handig
                     let a = Math.floor(Math.random()*400)+150;
                     let b = Math.floor(Math.random()*400)+100;
                     vraag = `  ${a}\n  ${b}\n-------- +\n`; antwoord = (a+b).toString();
                 } else {
-                    // Groep 5: Tot 10.000 / 100.000
                     let a = Math.floor(Math.random()*5000)+2000;
                     let b = Math.floor(Math.random()*4000)+1000;
                     vraag = `${a} + ${b} =`; antwoord = (a+b).toString();
@@ -409,17 +434,14 @@
 
             case 'aftrekken':
                 if (nv === 'b4') {
-                    // Tot 100
                     let a = Math.floor(Math.random()*50)+45;
                     let b = [10, 20, 30][Math.floor(Math.random()*3)];
                     vraag = `${a} - ${b} =`; antwoord = (a-b).toString();
                 } else if (nv === 'm4') {
-                    // Tot 1.000 onder elkaar
                     let a = Math.floor(Math.random()*500)+400;
                     let b = Math.floor(Math.random()*300)+50;
                     vraag = `  ${a}\n  ${b}\n-------- -\n`; antwoord = (a-b).toString();
                 } else {
-                    // Groep 5: Grote getallen / Schattend
                     let a = 10000;
                     let b = [2500, 4750, 3500, 6200][Math.floor(Math.random()*4)];
                     vraag = `${a} - ${b} =`; antwoord = (a-b).toString();
@@ -429,13 +451,11 @@
             case 'splitsen':
                 isSplits = true;
                 if (nv === 'b4') {
-                    // Tot 20, 50, 100 basis
                     let types = [{t:35, l:30}, {t:72, l:50}, {t:20, l:12}, {t:100, l:40}];
                     let sel = types[Math.floor(Math.random()*types.length)];
                     splitsData = { tot: sel.t, l: sel.l, r: '?' };
                     antwoord = (sel.t - sel.l).toString();
                 } else {
-                    // Midden G4 en Groep 5: Grotere splitsingsuitdagingen
                     let t = [86, 95, 140, 500][Math.floor(Math.random()*4)];
                     let l = t > 100 ? 400 : 80;
                     splitsData = { tot: t, l: l, r: '?' };
@@ -445,19 +465,16 @@
 
             case 'delen':
                 if (nv === 'b4') {
-                    // Eerlijk verdelen gekoppeld aan basis tafels
                     let delers = [2, 3, 5];
                     let d = delers[Math.floor(Math.random()*delers.length)];
                     let uitkomst = Math.floor(Math.random()*5)+2;
-                    vraag = `Verdeel ${d*uitkomst} eendjes eerlijk over ${d} vijvers. Hoeveel per vijver? \n(${d*uitkomst} : ${d} =)`; 
+                    vraag = `Verdeel ${d*uitkomst} eendjes eerlijk over ${d} vijvers. \n(${d*uitkomst} : ${d} =)`; 
                     antwoord = uitkomst.toString();
                 } else if (nv === 'm4') {
-                    // Binnen de tafels 1-10
                     let d = Math.floor(Math.random()*8)+2;
                     let ans = Math.floor(Math.random()*8)+2;
                     vraag = `${d*ans} : ${d} =`; antwoord = ans.toString();
                 } else {
-                    // Groep 5: Grote deelsommen tot 15
                     let d = [12, 15][Math.floor(Math.random()*2)];
                     let ans = [12, 15, 20, 16][Math.floor(Math.random()*4)];
                     vraag = `${d*ans} : ${d} =`; antwoord = ans.toString();
@@ -467,15 +484,13 @@
             case 'breuken':
                 if (nv === 'b4') {
                     vraag = Math.random() > 0.5 ? "Wat is de helft (1/2) van 12?" : "Wat is een kwart (1/4) van 16?";
-                    antwoord = query => vraag.includes("helft") ? "6" : "4";
-                    antwoord = antwoord();
+                    antwoord = vraag.includes("helft") ? "6" : "4";
                 } else if (nv === 'm4') {
                     let s = Math.floor(Math.random()*3);
                     if(s===0) { vraag = "Wat is 1/4 van 20?"; antwoord = "5"; }
                     else if(s===1) { vraag = "Wat is 3/4 van 20?"; antwoord = "15"; }
                     else { vraag = "Welke breuk hoort bij 3 van de 4 stukken taart?"; antwoord = "3/4"; }
                 } else {
-                    // Groep 5: Vergelijken / Getallenlijn
                     if(Math.random() > 0.5) {
                         vraag = "Welke breuk is groter: 2/4 of 3/4?"; antwoord = "3/4";
                     } else {
@@ -486,7 +501,6 @@
 
             case 'tijd':
                 if (nv === 'b4') {
-                    // Analoog/Digitaal hele, halve uren en kwartieren
                     let tijden = [
                         {v: "Op de klok staat het 🕒. Welke digitale tijd hoort hierbij?", a: "3:30"},
                         {v: "Het is kwart voor 4 in de middag. Welke digitale tijd is dat?", a: "15:45"},
@@ -497,21 +511,19 @@
                 } else if (nv === 'm4') {
                     vraag = "Zet om naar digitale tijd: Half 3 in de middag = ... uur"; antwoord = "14:30";
                 } else {
-                    // Groep 5: Tijdsduur berekenen
-                    vraag = "Een film begint om 14:35 en duurt 1 uur en 20 minuten.\nHoe laat is de film afgelopen?";
+                    vraag = "Een film begint om 14:35 en duurt 1 uur en 20 minuten.\nHoe laat is hij afgelopen?";
                     antwoord = "15:55";
                 }
                 break;
 
             case 'geld':
                 if (nv === 'b4') {
-                    vraag = "Je koopt een banaan van €1 en een sapje van €2. Je betaalt met een briefje van €5. Hoeveel euro krijg je terug?";
+                    vraag = "Je koopt een banaan van €1 en een sapje van €2. Je betaalt met €5. Hoeveel euro krijg je terug?";
                     antwoord = "2";
                 } else if (nv === 'm4') {
                     vraag = "Rens heeft €50. Hij koopt een game van €32. Hoeveel euro heeft hij over?";
                     antwoord = "18";
                 } else {
-                    // Groep 5: Wisselgeld & Maten omrekenen
                     if(Math.random() > 0.5) {
                         vraag = "Je koopt een boek van €12,50 en een pen van €3,50. Je betaalt met €20. Hoeveel wisselgeld krijg je?";
                         antwoord = "4";
@@ -523,14 +535,13 @@
 
             case 'redactie':
                 if (nv === 'b4') {
-                    vraag = `${rN} heeft 24 ${rO}. Ze krijgt er van haar meester nog 15 bij. Hoeveel heeft ze er nu?`;
+                    vraag = `${rN} heeft 24 ${rO}. Ze krijgt er 15 bij. Hoeveel heeft ze nu?`;
                     antwoord = "39";
                 } else if (nv === 'm4') {
                     vraag = `Er liggen 4 zakjes met elk 5 ${rO}. ${rN} neemt 3 ${rO} weg. Hoeveel zijn er over?`;
                     antwoord = "17";
                 } else {
-                    vraid = Math.floor(Math.random()*2);
-                    vraag = "Een winkel verkoopt 8 dozen met elk 24 potloden. Daarna worden er 35 potloden verkocht. Hoeveel potloden zijn er nog?";
+                    vraag = "Een winkel verkoopt 8 dozen met 24 potloden. Daarna worden 35 potloden verkocht. Hoeveel zijn er nog?";
                     antwoord = "157";
                 }
                 break;
@@ -544,46 +555,48 @@
         const container = document.getElementById('sommenContainer');
         container.innerHTML = '';
 
-        // Titel updaten op basis van gekozen filters
         let nvNaam = appState.niveau === 'b4' ? '🟢 Begin G4' : (appState.niveau === 'm4' ? '🔵 Midden G4' : '🟣 Groep 5 / Uitdaging');
         document.getElementById('werkblad-title').innerText = `Oefenblad (${nvNaam})`;
 
-        // Genereer mix van geselecteerde categorieën
-        for (let i = 0; i < appState.aantal; i++) {
-            let willekeurigOnderdeel = appState.onderdelen[Math.floor(Math.random() * appState.onderdelen.length)];
-            let som = genereerOpgave(willekeurigOnderdeel, appState.niveau);
-            actieveSommen.push(som);
+        // Genereer het gekozen aantal vragen PER geselecteerd onderdeel
+        let somIndex = 0;
+        appState.onderdelen.forEach(onderdeel => {
+            for (let i = 0; i < appState.aantal; i++) {
+                let som = genereerOpgave(onderdeel, appState.niveau);
+                actieveSommen.push(som);
 
-            let card = document.createElement('div');
-            card.className = 'som-card';
-            card.id = `som-card-${i}`;
+                let card = document.createElement('div');
+                card.className = 'som-card';
+                card.id = `som-card-${somIndex}`;
 
-            let inputMarkup = `<input type="text" autocomplete="off" class="som-input" id="input-${i}" placeholder="?">`;
+                let inputMarkup = `<input type="text" autocomplete="off" class="som-input" id="input-${somIndex}" placeholder="?">`;
 
-            if (som.isSplits) {
-                card.innerHTML = `
-                    <div class="som-info">
-                        <span class="som-tag">➗ Splitsen</span>
-                        <div class="som-vraag">Vul het missende getal in:</div>
-                        <div class="splits-box">
-                            <strong>[ ${som.splitsData.tot} ]</strong>
-                            <span>/ &nbsp; \</span>
-                            <span>[ ${som.splitsData.l} ] &nbsp; [ ${som.splitsData.r} ]</span>
+                if (som.isSplits) {
+                    card.innerHTML = `
+                        <div class="som-info">
+                            <span class="som-tag">➗ Splitsen</span>
+                            <div class="som-vraag">Vul het missende getal in:</div>
+                            <div class="splits-box">
+                                <strong>[ ${som.splitsData.tot} ]</strong>
+                                <span>/ &nbsp; \</span>
+                                <span>[ ${som.splitsData.l} ] &nbsp; [ ${som.splitsData.r} ]</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="som-input-container">${inputMarkup}</div>
-                `;
-            } else {
-                card.innerHTML = `
-                    <div class="som-info">
-                        <span class="som-tag">${som.label}</span>
-                        <div class="som-vraag">${som.vraag}</div>
-                    </div>
-                    <div class="som-input-container">${inputMarkup}</div>
-                `;
+                        <div class="som-input-container">${inputMarkup}</div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="som-info">
+                            <span class="som-tag">${som.label}</span>
+                            <div class="som-vraag">${som.vraag}</div>
+                        </div>
+                        <div class="som-input-container">${inputMarkup}</div>
+                    `;
+                }
+                container.appendChild(card);
+                somIndex++;
             }
-            container.appendChild(card);
-        }
+        });
 
         document.getElementById('btnNakijken').style.display = 'block';
         document.getElementById('btnNaarResultaat').style.display = 'none';
@@ -614,18 +627,26 @@
 
         let scorePercentage = Math.round((goedAantal / actieveSommen.length) * 100);
 
-        // State updaten en opslaan in localstorage
+        // Score XP toevoegen
         appState.globalXp += goedAantal;
         localStorage.setItem('rkn_g45_xp', appState.globalXp);
         document.getElementById('globalXpDisplay').innerText = appState.globalXp;
 
+        // Statistieken (blijvend) bijwerken
         let curNv = appState.niveau;
+        if (!appState.stats[curNv].hoogstePerc) appState.stats[curNv].hoogstePerc = 0;
+        
         appState.stats[curNv].bladen += 1;
         appState.stats[curNv].totaal += actieveSommen.length;
         appState.stats[curNv].goed += goedAantal;
+        
+        if (scorePercentage > appState.stats[curNv].hoogstePerc) {
+            appState.stats[curNv].hoogstePerc = scorePercentage;
+        }
+        
         localStorage.setItem('rkn_g45_stats', JSON.stringify(appState.stats));
 
-        // Evaluatiescherm invullen
+        // Evaluatie invullen
         document.getElementById('evalRatio').innerText = `${goedAantal} / ${actieveSommen.length}`;
         document.getElementById('evalDetails').innerText = `Fouten: ${actieveSommen.length - goedAantal} | Score: ${scorePercentage}%`;
 
@@ -657,13 +678,25 @@
 
         for (const [key, data] of Object.entries(appState.stats)) {
             let percentage = data.totaal > 0 ? Math.round((data.goed / data.totaal) * 100) + '%' : '-';
+            let hoogste = data.hoogstePerc || 0;
+
+            // Medaille logica op basis van hoogste score ooit behaald
+            let bronsClass = hoogste >= 50 ? 'earned' : '';
+            let zilverClass = hoogste >= 80 ? 'earned' : '';
+            let goudClass = hoogste === 100 ? 'earned' : '';
+
             tbody.innerHTML += `
                 <tr>
                     <td><strong>${niveausNamen[key]}</strong></td>
                     <td>${data.bladen}x</td>
-                    <td>${data.totaal}</td>
-                    <td>${data.goed}</td>
                     <td style="color:#2563eb; font-weight:800;">${percentage}</td>
+                    <td>
+                        <div class="medal-showcase">
+                            <span class="medal-icon ${bronsClass}" title="Voldoende (50%+) Margriet">🥉</span>
+                            <span class="medal-icon ${zilverClass}" title="Super (80%+) Zilver">🥈</span>
+                            <span class="medal-icon ${goudClass}" title="Foutloos (100%) Goud">🥇</span>
+                        </div>
+                    </td>
                 </tr>
             `;
         }
