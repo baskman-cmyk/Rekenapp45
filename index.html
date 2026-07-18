@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <title>Rekenen Groep 4 & 5 OefenApp</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
     <style>
         :root {
             --bg-main: #f8fafc;
@@ -47,7 +44,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            padding-bottom: 95px; /* 2 centimeter advertentiemarge */
+            padding-bottom: 95px;
         }
 
         .top-nav {
@@ -94,7 +91,6 @@
 
         .main-title { font-size: 20px; font-weight: 800; margin: 16px 0 12px 0; display: flex; align-items: center; gap: 8px; }
         
-        /* Selectie Kaarten */
         .config-card {
             background: var(--bg-card); border: 2px solid var(--border);
             border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px;
@@ -102,7 +98,6 @@
         }
         .config-card h4 { margin-bottom: 14px; font-size: 16px; font-weight: 800; color: #334155; }
 
-        /* Niveau Knoppen */
         .level-row { display: flex; gap: 10px; }
         .level-btn {
             flex: 1; padding: 16px 10px; border-radius: var(--radius-md);
@@ -113,7 +108,6 @@
         .level-btn.active[data-nv="m4"] { background: var(--clr-m4); color: white; border-color: var(--clr-m4); }
         .level-btn.active[data-nv="g5"] { background: var(--clr-g5); color: white; border-color: var(--clr-g5); }
 
-        /* Multi-Select Rooster */
         .items-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -142,27 +136,34 @@
         .btn-action {
             background: #2563eb; color: white; border: none; padding: 18px;
             border-radius: var(--radius-lg); font-weight: 800; font-size: 18px; cursor: pointer;
-            width: 100%; text-align: center; box-shadow: 0 4px 10px rgba(37,99,235,0.2);
+            width: 100%; text-align: center; box-shadow: 0 4px 10 rgba(37,99,235,0.2);
         }
-        .btn-action:active { transform: scale(0.99); }
 
-        /* Sommen Layout */
         .som-card {
             background: var(--bg-card); border: 2px solid var(--border);
             border-radius: var(--radius-lg); padding: 20px; margin-bottom: 14px;
-            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            display: flex; flex-direction: column; gap: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+        }
+        @media(min-width: 500px) {
+            .som-card { flex-direction: row; align-items: center; justify-content: space-between; }
         }
         .som-info { flex: 1; }
         .som-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; background: #f1f5f9; color: #64748b; display: inline-block; margin-bottom: 6px; }
-        .som-vraag { font-size: 18px; font-weight: 800; white-space: pre-line; color: #0f172a; line-height: 1.4; }
-        .som-input-container { display: flex; align-items: center; }
+        .som-vraag { font-size: 17px; font-weight: 800; white-space: pre-line; color: #0f172a; line-height: 1.4; }
+        .som-input-container { display: flex; align-items: center; gap: 10px; }
         .som-input {
-            width: 120px; height: 50px; border-radius: var(--radius-md); border: 3px solid #cbd5e1;
-            font-size: 20px; text-align: center; font-weight: 800; outline: none; background: #f8fafc;
+            width: 130px; height: 50px; border-radius: var(--radius-md); border: 3px solid #cbd5e1;
+            font-size: 18px; text-align: center; font-weight: 800; outline: none; background: #f8fafc;
         }
         .som-input:focus { border-color: #2563eb; background: white; }
         
+        .klok-canvas {
+            background: white;
+            margin: 10px 0;
+            display: block;
+        }
+
         .splits-box {
             display: inline-flex; flex-direction: column; align-items: center;
             background: #f8fafc; border: 2px dashed #cbd5e1; padding: 8px 16px;
@@ -172,18 +173,13 @@
         .som-card.correct { border-color: #10b981; background: #f0fdf4; }
         .som-card.incorrect { border-color: #ef4444; background: #fef2f2; }
 
-        /* Voortgang & Medailles Dashboard */
         .stats-block { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 16px; overflow-x: auto; margin-bottom: 15px; }
         .stats-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
         .stats-table th, .stats-table td { padding: 12px 10px; border-bottom: 1px solid var(--border); }
         .stats-table th { font-weight: 800; color: var(--text-muted); }
 
-        .medal-showcase {
-            display: flex; gap: 8px; justify-content: flex-start;
-        }
-        .medal-icon {
-            font-size: 18px; filter: grayscale(100%); opacity: 0.3; transition: all 0.3s;
-        }
+        .medal-showcase { display: flex; gap: 8px; }
+        .medal-icon { font-size: 18px; filter: grayscale(100%); opacity: 0.3; transition: all 0.3s; }
         .medal-icon.earned { filter: grayscale(0%); opacity: 1; transform: scale(1.1); }
 
         .eval-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 32px 20px; text-align: center; }
@@ -194,7 +190,6 @@
 
 <div class="app-window">
     
-    <!-- Top Navigatiebalk -->
     <div class="top-nav">
         <div class="logo-area">
             <h1 id="nav-title">Rekenen Groep 4/5</h1>
@@ -206,10 +201,8 @@
         </div>
     </div>
 
-    <!-- VIEW 1: CONFIGURATIE (HOOFDMENU) -->
+    <!-- VIEW 1: CONFIGURATIE -->
     <div id="view-main" class="view active">
-        
-        <!-- Stap 1: Niveau selectie -->
         <div class="config-card">
             <h4>1. Kies het niveau van de leerstof:</h4>
             <div class="level-row">
@@ -219,7 +212,6 @@
             </div>
         </div>
 
-        <!-- Stap 2: Onderdelen selectie (Multi-select) -->
         <div class="config-card">
             <h4>2. Selecteer één of meerdere onderdelen:</h4>
             <div class="items-grid">
@@ -253,7 +245,6 @@
             </div>
         </div>
 
-        <!-- Stap 3: Aantal vragen -->
         <div class="config-card">
             <h4>3. Aantal opdrachten per gekozen onderdeel:</h4>
             <div class="choice-group">
@@ -282,7 +273,7 @@
         </div>
     </div>
 
-    <!-- VIEW 2: HET ACTIEVE WERKBLAD -->
+    <!-- VIEW 2: WERKBLAD -->
     <div id="view-werkblad" class="view">
         <button class="btn-home" onclick="gaNaarMenu()">⬅️ Aanpassen</button>
         <div class="main-title" id="werkblad-title">Mijn Werkblad</div>
@@ -293,7 +284,7 @@
         <button class="btn-action safe-margin" id="btnNaarResultaat" style="background:#f59e0b; display:none;" onclick="gaNaarEvaluatie()">Bekijk Resultaat 🏆</button>
     </div>
 
-    <!-- VIEW 3: EVALUATIE / UITKOMST -->
+    <!-- VIEW 3: RESULTAAT -->
     <div id="view-resultaat" class="view">
         <div class="main-title">Resultaat 🌟</div>
         <div class="eval-card safe-margin">
@@ -307,7 +298,6 @@
 </div>
 
 <script>
-    // State management
     let appState = {
         niveau: 'b4',
         onderdelen: ['tafels', 'optellen'],
@@ -322,10 +312,11 @@
 
     let actieveSommen = [];
 
-    const namen = ["Lisa", "Sem", "Mila", "Daan", "Sophie", "Lucas", "Emma", "Luuk", "Milan", "Julia", "Saar"];
-    const objecten = ["stickers", "knikkers", "snoepjes", "potloden", "koekjes", "appels", "kaarten"];
+    const namen = ["Lisa", "Sem", "Mila", "Daan", "Sophie", "Lucas", "Emma", "Luuk", "Milan", "Julia", "Saar", "Stijn", "Lotte", "Thomas", "Tess"];
+    const fruit = ["banaan", "appel", "peer", "meloen", "sinaasappel"];
+    const snacks = ["sapje", "koekje", "ijsco", "croissant", "broodje"];
+    const spulletjes = ["knikkers", "stickers", "potloden", "kaarten", "schelpen", "lego-blokjes", "autootjes"];
 
-    // Initialisatie
     document.getElementById('globalXpDisplay').innerText = appState.globalXp;
     updateStatsTabel();
 
@@ -375,58 +366,129 @@
         switchView('main');
     }
 
-    // --- ALGORITMISCHE REKEN-ENGINE ---
+    // Canvas analoge klok generator
+    function tekenKlok(canvasId, uren, minuten) {
+        const canvas = document.getElementById(canvasId);
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const r = canvas.width / 2;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.translate(r, r);
+        const radius = r * 0.85;
+
+        // Wijzerplaat rand
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, 0, 2*Math.PI);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Middelpunt stip
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, 2*Math.PI);
+        ctx.fillStyle = '#1e293b';
+        ctx.fill();
+
+        // Uur- en minuutstreepjes (per minuut)
+        for (let num = 0; num < 60; num++) {
+            let ang = num * Math.PI / 30;
+            ctx.rotate(ang);
+            ctx.beginPath();
+            if (num % 5 === 0) {
+                ctx.moveTo(0, -radius);
+                ctx.lineTo(0, -radius + 12);
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 3;
+            } else {
+                ctx.moveTo(0, -radius);
+                ctx.lineTo(0, -radius + 6);
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 1.5;
+            }
+            ctx.stroke();
+            ctx.rotate(-ang);
+        }
+
+        // Getallen 1 t/m 12
+        ctx.font = "bold 14px Arial";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        ctx.fillStyle = '#0f172a';
+        for (let num = 1; num <= 12; num++) {
+            let ang = num * Math.PI / 6;
+            ctx.rotate(ang);
+            ctx.translate(0, -radius + 24);
+            ctx.rotate(-ang);
+            ctx.fillText(num.toString(), 0, 0);
+            ctx.rotate(ang);
+            ctx.translate(0, radius - 24);
+            ctx.rotate(-ang);
+        }
+
+        // Urenwijzer berekenen
+        let uurPos = (uren % 12) * Math.PI / 6 + (minuten * Math.PI / 360);
+        tekenWijzer(ctx, uurPos, radius * 0.5, 5, '#1e293b');
+
+        // Minutenwijzer berekenen
+        let minPos = minuten * Math.PI / 30;
+        tekenWijzer(ctx, minPos, radius * 0.75, 3, '#3b82f6');
+        
+        ctx.translate(-r, -r);
+    }
+
+    function tekenWijzer(ctx, pos, length, width, color) {
+        ctx.beginPath();
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = color;
+        ctx.moveTo(0, 0);
+        ctx.rotate(pos);
+        ctx.lineTo(0, -length);
+        ctx.stroke();
+        ctx.rotate(-pos);
+    }
+
+    // Uitgebreide en wisselende reken-engine
     function genereerOpgave(onderdeel, nv) {
-        let vraag = '', antwoord = '', label = onderdeel, isSplits = false, splitsData = null;
-        let rN = namen[Math.floor(Math.random()*namen.length)];
-        let rO = objecten[Math.floor(Math.random()*objecten.length)];
+        let vraag = '', antwoord = '', label = onderdeel, isSplits = false, splitsData = null, heeftKlok = false, klokTijd = null;
+        
+        let pN = namen[Math.floor(Math.random()*namen.length)];
+        let pN2 = namen[(namen.indexOf(pN) + 1) % namen.length];
+        let fr = fruit[Math.floor(Math.random()*fruit.length)];
+        let sn = snacks[Math.floor(Math.random()*snacks.length)];
+        let sp = spulletjes[Math.floor(Math.random()*spulletjes.length)];
 
         switch (onderdeel) {
             case 'tafels':
                 if (nv === 'b4') {
-                    let tfls = [2, 3, 4, 5, 10];
-                    let t = tfls[Math.floor(Math.random()*tfls.length)];
+                    let t = [2, 3, 4, 5, 10][Math.floor(Math.random()*5)];
                     let f = Math.floor(Math.random()*9)+1;
                     vraag = `${f} × ${t} =`; antwoord = (f*t).toString();
                 } else if (nv === 'm4') {
-                    let t = Math.floor(Math.random()*10)+1;
-                    let f = Math.floor(Math.random()*10)+1;
-                    if(Math.random() > 0.7) {
-                        vraag = `${f} dozen met elk ${t} eieren. Hoeveel eieren zijn dat?`;
-                    } else {
-                        vraag = `${f} × ${t} =`;
-                    }
-                    antwoord = (f*t).toString();
+                    let t = Math.floor(Math.random()*9)+2;
+                    let f = Math.floor(Math.random()*8)+2;
+                    vraag = `${f} × ${t} =`; antwoord = (f*t).toString();
                 } else {
-                    if (Math.random() > 0.5) {
-                        let t = [11, 12, 13, 14, 15][Math.floor(Math.random()*5)];
-                        let f = Math.floor(Math.random()*9)+2;
-                        vraag = `${f} × ${t} =`; antwoord = (f*t).toString();
-                    } else {
-                        let f = [8, 12, 6, 15][Math.floor(Math.random()*4)];
-                        let t = [25, 50][Math.floor(Math.random()*2)];
-                        vraag = `${f} × ${t} =`; antwoord = (f*t).toString();
-                    }
+                    let t = [12, 15, 25, 30][Math.floor(Math.random()*4)];
+                    let f = Math.floor(Math.random()*7)+3;
+                    vraag = `${f} × ${t} =`; antwoord = (f*t).toString();
                 }
                 break;
 
             case 'optellen':
                 if (nv === 'b4') {
-                    if (Math.random() > 0.5) {
-                        let a = [20, 30, 40, 50][Math.floor(Math.random()*4)];
-                        let b = Math.floor(Math.random()*40)+11;
-                        vraag = `${b} + ${a} =`; antwoord = (b+a).toString();
-                    } else {
-                        let a = Math.floor(Math.random()*70)+15;
-                        let b = Math.floor(Math.random()*7)+2;
-                        vraag = `${a} + ${b} =`; antwoord = (a+b).toString();
-                    }
+                    let a = Math.floor(Math.random()*40)+15;
+                    let b = Math.floor(Math.random()*30)+11;
+                    vraag = `${a} + ${b} =`; antwoord = (a+b).toString();
                 } else if (nv === 'm4') {
-                    let a = Math.floor(Math.random()*400)+150;
-                    let b = Math.floor(Math.random()*400)+100;
+                    let a = Math.floor(Math.random()*300)+100;
+                    let b = Math.floor(Math.random()*300)+50;
                     vraag = `  ${a}\n  ${b}\n-------- +\n`; antwoord = (a+b).toString();
                 } else {
-                    let a = Math.floor(Math.random()*5000)+2000;
+                    let a = Math.floor(Math.random()*4000)+1500;
                     let b = Math.floor(Math.random()*4000)+1000;
                     vraag = `${a} + ${b} =`; antwoord = (a+b).toString();
                 }
@@ -434,120 +496,130 @@
 
             case 'aftrekken':
                 if (nv === 'b4') {
-                    let a = Math.floor(Math.random()*50)+45;
-                    let b = [10, 20, 30][Math.floor(Math.random()*3)];
+                    let a = Math.floor(Math.random()*50)+40;
+                    let b = Math.floor(Math.random()*25)+5;
                     vraag = `${a} - ${b} =`; antwoord = (a-b).toString();
                 } else if (nv === 'm4') {
-                    let a = Math.floor(Math.random()*500)+400;
-                    let b = Math.floor(Math.random()*300)+50;
+                    let a = Math.floor(Math.random()*600)+300;
+                    let b = Math.floor(Math.random()*250)+40;
                     vraag = `  ${a}\n  ${b}\n-------- -\n`; antwoord = (a-b).toString();
                 } else {
-                    let a = 10000;
-                    let b = [2500, 4750, 3500, 6200][Math.floor(Math.random()*4)];
+                    let a = Math.floor(Math.random()*8000)+2000;
+                    let b = Math.floor(Math.random()*1500)+400;
                     vraag = `${a} - ${b} =`; antwoord = (a-b).toString();
                 }
                 break;
 
             case 'splitsen':
                 isSplits = true;
-                if (nv === 'b4') {
-                    let types = [{t:35, l:30}, {t:72, l:50}, {t:20, l:12}, {t:100, l:40}];
-                    let sel = types[Math.floor(Math.random()*types.length)];
-                    splitsData = { tot: sel.t, l: sel.l, r: '?' };
-                    antwoord = (sel.t - sel.l).toString();
-                } else {
-                    let t = [86, 95, 140, 500][Math.floor(Math.random()*4)];
-                    let l = t > 100 ? 400 : 80;
-                    splitsData = { tot: t, l: l, r: '?' };
-                    antwoord = (t - l).toString();
-                }
+                let tot = nv === 'b4' ? [20, 30, 40, 50, 100][Math.floor(Math.random()*5)] : Math.floor(Math.random()*150)+60;
+                let l = Math.floor(tot * 0.6);
+                splitsData = { tot: tot, l: l, r: '?' };
+                antwoord = (tot - l).toString();
                 break;
 
             case 'delen':
-                if (nv === 'b4') {
-                    let delers = [2, 3, 5];
-                    let d = delers[Math.floor(Math.random()*delers.length)];
-                    let uitkomst = Math.floor(Math.random()*5)+2;
-                    vraag = `Verdeel ${d*uitkomst} eendjes eerlijk over ${d} vijvers. \n(${d*uitkomst} : ${d} =)`; 
-                    antwoord = uitkomst.toString();
-                } else if (nv === 'm4') {
-                    let d = Math.floor(Math.random()*8)+2;
-                    let ans = Math.floor(Math.random()*8)+2;
-                    vraag = `${d*ans} : ${d} =`; antwoord = ans.toString();
-                } else {
-                    let d = [12, 15][Math.floor(Math.random()*2)];
-                    let ans = [12, 15, 20, 16][Math.floor(Math.random()*4)];
-                    vraag = `${d*ans} : ${d} =`; antwoord = ans.toString();
-                }
+                let d = nv === 'b4' ? [2, 3, 5, 10][Math.floor(Math.random()*4)] : Math.floor(Math.random()*7)+3;
+                let ans = Math.floor(Math.random()*8)+3;
+                vraag = `${d*ans} : ${d} =`; antwoord = ans.toString();
                 break;
 
             case 'breuken':
+                let brScenario = Math.floor(Math.random()*4);
                 if (nv === 'b4') {
-                    vraag = Math.random() > 0.5 ? "Wat is de helft (1/2) van 12?" : "Wat is een kwart (1/4) van 16?";
-                    antwoord = vraag.includes("helft") ? "6" : "4";
-                } else if (nv === 'm4') {
-                    let s = Math.floor(Math.random()*3);
-                    if(s===0) { vraag = "Wat is 1/4 van 20?"; antwoord = "5"; }
-                    else if(s===1) { vraag = "Wat is 3/4 van 20?"; antwoord = "15"; }
-                    else { vraag = "Welke breuk hoort bij 3 van de 4 stukken taart?"; antwoord = "3/4"; }
-                } else {
-                    if(Math.random() > 0.5) {
-                        vraag = "Welke breuk is groter: 2/4 of 3/4?"; antwoord = "3/4";
+                    let tempVal = [8, 12, 16, 20, 24][Math.floor(Math.random()*5)];
+                    if (Math.random() > 0.5) {
+                        vraag = `Wat is de helft (1/2) van ${tempVal}?`; antwoord = (tempVal / 2).toString();
                     } else {
-                        vraag = "Wat is 1/3 van 30?"; antwoord = "10";
+                        vraag = `Wat is een kwart (1/4) van ${tempVal}?`; antwoord = (tempVal / 4).toString();
+                    }
+                } else if (nv === 'm4') {
+                    if(brScenario === 0) {
+                        vraag = "Wat is 1/3 van 15?"; antwoord = "5";
+                    } else if(brScenario === 1) {
+                        vraag = "Wat is 3/4 van 12?"; antwoord = "9";
+                    } else if(brScenario === 2) {
+                        vraag = "Welke breuk hoort bij 2 van de 5 taartpunten?"; antwoord = "2/5";
+                    } else {
+                        vraag = "Wat is 1/5 van 25?"; antwoord = "5";
+                    }
+                } else {
+                    if(brScenario === 0) {
+                        vraag = "Welke breuk is groter: 3/8 of 5/8?"; antwoord = "5/8";
+                    } else if(brScenario === 1) {
+                        vraag = "Wat is 2/6 van 18?"; antwoord = "6";
+                    } else if(brScenario === 2) {
+                        vraag = "Wat is 5/8 van 32?"; antwoord = "20";
+                    } else {
+                        vraag = "Wat is 4/5 van 50?"; antwoord = "40";
                     }
                 }
                 break;
 
             case 'tijd':
-                if (nv === 'b4') {
-                    let tijden = [
-                        {v: "Op de klok staat het 🕒. Welke digitale tijd hoort hierbij?", a: "3:30"},
-                        {v: "Het is kwart voor 4 in de middag. Welke digitale tijd is dat?", a: "15:45"},
-                        {v: "De grote wijzer staat op de 6, de kleine tussen 8 en 9. Hoe laat is het?", a: "half 9"}
-                    ];
-                    let sel = tijden[Math.floor(Math.random()*tijden.length)];
-                    vraag = sel.v; antwoord = sel.a;
-                } else if (nv === 'm4') {
-                    vraag = "Zet om naar digitale tijd: Half 3 in de middag = ... uur"; antwoord = "14:30";
-                } else {
-                    vraag = "Een film begint om 14:35 en duurt 1 uur en 20 minuten.\nHoe laat is hij afgelopen?";
-                    antwoord = "15:55";
-                }
+                heeftKlok = true;
+                // Genereer willekeurige tijden op intervallen van 5 minuten
+                let mogelijkeUren = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+                let mogelijkeMinuten = [0, 5, 15, 20, 30, 40, 45, 50];
+                let randomUur = mogelijkeUren[Math.floor(Math.random()*mogelijkeUren.length)];
+                let randomMin = mogelijkeMinuten[Math.floor(Math.random()*mogelijkeMinuten.length)];
+                klokTijd = { u: randomUur, m: randomMin };
+
+                // Antwoord formatteren
+                let minStr = randomMin < 10 ? '0' + randomMin : randomMin;
+                vraag = "Hoe laat is het op deze analoge klok? (Typ bijv. als 4:15 of 10:30)"; 
+                antwoord = `${randomUur}:${minStr}`;
                 break;
 
             case 'geld':
-                if (nv === 'b4') {
-                    vraag = "Je koopt een banaan van €1 en een sapje van €2. Je betaalt met €5. Hoeveel euro krijg je terug?";
-                    antwoord = "2";
-                } else if (nv === 'm4') {
-                    vraag = "Rens heeft €50. Hij koopt een game van €32. Hoeveel euro heeft hij over?";
-                    antwoord = "18";
+                let geldType = Math.floor(Math.random()*3);
+                if (geldType === 0) {
+                    let k1 = Math.floor(Math.random()*3)+1;
+                    let k2 = Math.floor(Math.random()*2)+1;
+                    let betaal = [5, 10, 20][Math.floor(Math.random()*3)];
+                    while(betaal <= (k1+k2)) { betaal += 5; }
+                    vraag = `Je koopt een ${fr} van €${k1} en een ${sn} van €${k2}. Je betaalt met een briefje van €${betaal}. Hoeveel euro krijg je terug?`;
+                    antwoord = (betaal - (k1 + k2)).toString();
+                } else if (geldType === 1) {
+                    let prijs = [15, 24, 35, 42, 60][Math.floor(Math.random()*5)];
+                    let korting = [5, 10, 15][Math.floor(Math.random()*3)];
+                    vraag = `Een rugzak kost normaal €${prijs}. Vandaag krijg je €${korting} korting. Hoeveel kost de rugzak nu?`;
+                    antwoord = (prijs - korting).toString();
                 } else {
-                    if(Math.random() > 0.5) {
-                        vraag = "Je koopt een boek van €12,50 en een pen van €3,50. Je betaalt met €20. Hoeveel wisselgeld krijg je?";
-                        antwoord = "4";
-                    } else {
-                        vraag = "Hoeveel meter is 400 centimeter?"; antwoord = "4";
-                    }
+                    let aantalMeters = [3, 5, 7, 9, 12][Math.floor(Math.random()*5)];
+                    vraag = `Hoeveel centimeter is ${aantalMeters} meter?`;
+                    antwoord = (aantalMeters * 100).toString();
                 }
                 break;
 
             case 'redactie':
-                if (nv === 'b4') {
-                    vraag = `${rN} heeft 24 ${rO}. Ze krijgt er 15 bij. Hoeveel heeft ze nu?`;
-                    antwoord = "39";
-                } else if (nv === 'm4') {
-                    vraag = `Er liggen 4 zakjes met elk 5 ${rO}. ${rN} neemt 3 ${rO} weg. Hoeveel zijn er over?`;
-                    antwoord = "17";
+                let redType = Math.floor(Math.random()*4);
+                if (redType === 0) {
+                    let start = Math.floor(Math.random()*40)+20;
+                    let erbij = Math.floor(Math.random()*25)+10;
+                    vraag = `${pN} heeft ${start} ${sp}. Ze krijgt er ${erbij} bij van haar opa. Hoeveel heeft ze er nu in totaal?`;
+                    antwoord = (start + erbij).toString();
+                } else if (redType === 1) {
+                    let start = Math.floor(Math.random()*60)+30;
+                    let eraf = Math.floor(Math.random()*20)+5;
+                    vraag = `Er zitten ${start} kinderen in de schoolbus. Bij de eerste halte stappen er ${eraf} uit. Hoeveel kinderen zitten er nog in de bus?`;
+                    antwoord = (start - eraf).toString();
+                } else if (redType === 2) {
+                    let zakjes = Math.floor(Math.random()*4)+3;
+                    let perZakje = Math.floor(Math.random()*5)+4;
+                    vraag = `${pN} heeft ${zakjes} zakjes. In elk zakje zitten ${perZakje} ${sp}. Hoeveel ${sp} heeft ${pN} in totaal?`;
+                    antwoord = (zakjes * perZakje).toString();
                 } else {
-                    vraag = "Een winkel verkoopt 8 dozen met 24 potloden. Daarna worden 35 potloden verkocht. Hoeveel zijn er nog?";
-                    antwoord = "157";
+                    let items = Math.floor(Math.random()*30)+15;
+                    let vrienden = [2, 3, 5][Math.floor(Math.random()*3)];
+                    while(items % vrienden !== 0) { items++; }
+                    vraag = `${pN} verdeelt ${items} ${sp} eerlijk onder ${vrienden} vrienden. Hoeveel krijgt iedereen?`;
+                    antwoord = (items / vrienden).toString();
                 }
                 break;
         }
 
-        return { vraag, antwoord, label, isSplits, splitsData };
+        return { vraag, antwoord, label, isSplits, splitsData, heeftKlok, klokTijd };
     }
 
     function genereerWerkblad() {
@@ -558,7 +630,6 @@
         let nvNaam = appState.niveau === 'b4' ? '🟢 Begin G4' : (appState.niveau === 'm4' ? '🔵 Midden G4' : '🟣 Groep 5 / Uitdaging');
         document.getElementById('werkblad-title').innerText = `Oefenblad (${nvNaam})`;
 
-        // Genereer het gekozen aantal vragen PER geselecteerd onderdeel
         let somIndex = 0;
         appState.onderdelen.forEach(onderdeel => {
             for (let i = 0; i < appState.aantal; i++) {
@@ -584,6 +655,15 @@
                         </div>
                         <div class="som-input-container">${inputMarkup}</div>
                     `;
+                } else if (som.heeftKlok) {
+                    card.innerHTML = `
+                        <div class="som-info">
+                            <span class="som-tag">⏰ Tijd & Klok</span>
+                            <div class="som-vraag">${som.vraag}</div>
+                            <canvas id="klok-canvas-${somIndex}" class="klok-canvas" width="160" height="160"></canvas>
+                        </div>
+                        <div class="som-input-container">${inputMarkup}</div>
+                    `;
                 } else {
                     card.innerHTML = `
                         <div class="som-info">
@@ -593,7 +673,14 @@
                         <div class="som-input-container">${inputMarkup}</div>
                     `;
                 }
+                
                 container.appendChild(card);
+                
+                // Als het een klokopdracht is, teken hem direct nadat het element is toegevoegd
+                if(som.heeftKlok) {
+                    tekenKlok(`klok-canvas-${somIndex}`, som.klokTijd.u, som.klokTijd.m);
+                }
+                
                 somIndex++;
             }
         });
@@ -609,7 +696,7 @@
         for (let i = 0; i < actieveSommen.length; i++) {
             let inp = document.getElementById(`input-${i}`);
             let card = document.getElementById(`som-card-${i}`);
-            let spelerAntwoord = inp.value.trim().toLowerCase().replace(/\s+/g, '');
+            let spelerAntwoord = inp.value.trim().toLowerCase().replace(/\s+/g, '').replace('uur','');
             let juisteAntwoord = actieveSommen[i].antwoord.toLowerCase().replace(/\s+/g, '');
 
             if (spelerAntwoord === juisteAntwoord) {
@@ -627,15 +714,11 @@
 
         let scorePercentage = Math.round((goedAantal / actieveSommen.length) * 100);
 
-        // Score XP toevoegen
         appState.globalXp += goedAantal;
         localStorage.setItem('rkn_g45_xp', appState.globalXp);
         document.getElementById('globalXpDisplay').innerText = appState.globalXp;
 
-        // Statistieken (blijvend) bijwerken
         let curNv = appState.niveau;
-        if (!appState.stats[curNv].hoogstePerc) appState.stats[curNv].hoogstePerc = 0;
-        
         appState.stats[curNv].bladen += 1;
         appState.stats[curNv].totaal += actieveSommen.length;
         appState.stats[curNv].goed += goedAantal;
@@ -646,7 +729,6 @@
         
         localStorage.setItem('rkn_g45_stats', JSON.stringify(appState.stats));
 
-        // Evaluatie invullen
         document.getElementById('evalRatio').innerText = `${goedAantal} / ${actieveSommen.length}`;
         document.getElementById('evalDetails').innerText = `Fouten: ${actieveSommen.length - goedAantal} | Score: ${scorePercentage}%`;
 
@@ -680,7 +762,6 @@
             let percentage = data.totaal > 0 ? Math.round((data.goed / data.totaal) * 100) + '%' : '-';
             let hoogste = data.hoogstePerc || 0;
 
-            // Medaille logica op basis van hoogste score ooit behaald
             let bronsClass = hoogste >= 50 ? 'earned' : '';
             let zilverClass = hoogste >= 80 ? 'earned' : '';
             let goudClass = hoogste === 100 ? 'earned' : '';
@@ -692,9 +773,9 @@
                     <td style="color:#2563eb; font-weight:800;">${percentage}</td>
                     <td>
                         <div class="medal-showcase">
-                            <span class="medal-icon ${bronsClass}" title="Voldoende (50%+) Margriet">🥉</span>
-                            <span class="medal-icon ${zilverClass}" title="Super (80%+) Zilver">🥈</span>
-                            <span class="medal-icon ${goudClass}" title="Foutloos (100%) Goud">🥇</span>
+                            <span class="medal-icon ${bronsClass}" title="Voldoende (50%+)">🥉</span>
+                            <span class="medal-icon ${zilverClass}" title="Super (80%+)">🥈</span>
+                            <span class="medal-icon ${goudClass}" title="Foutloos (100%)">🥇</span>
                         </div>
                     </td>
                 </tr>
