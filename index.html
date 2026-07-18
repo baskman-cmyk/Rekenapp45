@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smarter RekenApp Pro v3</title>
+    <title>Smarter RekenApp Pro v4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -61,22 +61,26 @@
         .som-row { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 12px; }
         .som-body { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 16px; }
         .som-vraag { font-size: 15px; font-weight: 700; flex: 1; }
-        .som-input { width: 100px; height: 44px; border-radius: 8px; border: 2px solid var(--border); background: var(--bg-main); font-size: 16px; text-align: center; font-weight: 700; outline: none; }
+        .som-input { width: 110px; height: 44px; border-radius: 8px; border: 2px solid var(--border); background: var(--bg-main); font-size: 16px; text-align: center; font-weight: 700; outline: none; }
         .som-input:focus { border-color: var(--primary); background: #fff; }
+        .som-uitleg { font-size: 12px; color: var(--text-muted); font-style: italic; margin-top: 2px; }
 
         .splitsboom-wrapper { display: flex; flex-direction: column; align-items: center; margin: 10px auto; width: 150px; }
-        .splits-top { width: 54px; height: 54px; border-radius: 50%; border: 3px solid var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; background: #fff; }
+        .splits-top { width: 58px; height: 58px; border-radius: 50%; border: 3px solid var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; background: #fff; }
         .splits-takken { display: flex; justify-content: space-between; width: 90px; height: 30px; border-left: 3px solid var(--text-main); border-right: 3px solid var(--text-main); border-top: 3px solid var(--text-main); margin: 2px 0; }
         .splits-bottom { display: flex; justify-content: space-between; width: 140px; }
-        .splits-box { width: 50px; height: 50px; border: 3px solid var(--text-main); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; background: #fff; overflow: hidden; }
+        .splits-box { width: 54px; height: 54px; border: 3px solid var(--text-main); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; background: #fff; overflow: hidden; }
         .splits-box input { width: 100%; height: 100%; border: none; text-align: center; font-size: 16px; font-weight: 700; outline: none; background: var(--bg-main); }
 
-        .geld-item { display: inline-flex; align-items: center; justify-content: center; margin: 3px; font-weight: 700; font-size: 12px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .munt { width: 34px; height: 34px; border-radius: 50%; background: #ffd700; border: 2px solid #daa520; color: #553c00; }
-        .munt.brons { background: #cd7f32; border-color: #8b5a2b; color: #fff; }
-        .munt.zilver { background: #e6e6e6; border-color: #b3b3b3; color: #333; }
-        .biljet { width: 58px; height: 34px; border-radius: 4px; background: #85bb65; border: 2px solid #557a3e; color: #fff; }
-        .biljet.blauw { background: #2563eb; border-color: #1d4ed8; }
+        /* GELD MET DUIDELIJKE BRIEFJES EN MUNTEN */
+        .geld-item { display: inline-flex; align-items: center; justify-content: center; margin: 4px; font-weight: 800; font-size: 13px; box-shadow: 0 3px 5px rgba(0,0,0,0.15); box-sizing: border-box; }
+        .munt { width: 38px; height: 38px; border-radius: 50%; background: #ffd700; border: 3px solid #b8860b; color: #4a3500; text-shadow: 0 1px 0 rgba(255,255,255,0.4); }
+        .munt.brons { background: #d2691e; border-color: #8b4513; color: #fff; font-size: 11px; }
+        .munt.zilver { background: #e6e6e6; border-color: #a9a9a9; color: #222; }
+        .biljet { width: 68px; height: 40px; border-radius: 6px; background: #85bb65; border: 3px solid #3b5e28; color: #fff; position: relative; border-style: double; }
+        .biljet::before { content: ''; position: absolute; top: 3px; left: 3px; right: 3px; bottom: 3px; border: 1px dashed rgba(255,255,255,0.4); border-radius: 2px; }
+        .biljet.blauw { background: #2563eb; border-color: #1e3a8a; }
+        .biljet.rood { background: #dc2626; border-color: #7f1d1d; }
 
         .som-row.correct { border-color: var(--success); background: #e6fcf5; }
         .som-row.incorrect { border-color: var(--danger); background: #fff5f5; }
@@ -90,7 +94,7 @@
             <button class="btn-home" onclick="terugNaarHome()">🏠 Dashboard</button>
             <span id="appLevelTitle" style="margin-left:10px; font-weight:800;">Groep 4 (Midden)</span>
         </div>
-        <div class="score-badge">🏆 Totale XP: <span id="xpDisplay">0</span></div>
+        <div class="score-badge">🏆 Punten: <span id="xpDisplay">0</span></div>
     </div>
 
     <!-- DASHBOARD VIEW -->
@@ -110,11 +114,11 @@
         <div class="dashboard-grid">
             <div class="tile active" id="tile-splitsen" onclick="toggleTile('splitsen')">
                 <div class="tile-icon">🪵</div>
-                <div><h3>Splitsbomen</h3><p>Visuele structuren</p></div>
+                <div><h3>Splitsbomen</h3><p>Hogere getallen & variatie</p></div>
             </div>
             <div class="tile active" id="tile-tafels" onclick="toggleTile('tafels')">
                 <div class="tile-icon">✖️</div>
-                <div><h3>Tafels</h3><p>Zonder tafel van 1</p></div>
+                <div><h3>Tafels</h3><p>Afgestemd per niveau</p></div>
             </div>
             <div class="tile active" id="tile-optellen_aftrekken" onclick="toggleTile('optellen_aftrekken')">
                 <div class="tile-icon">➕</div>
@@ -122,15 +126,15 @@
             </div>
             <div class="tile active" id="tile-klokkijken" onclick="toggleTile('klokkijken')">
                 <div class="tile-icon">🕒</div>
-                <div><h3>Visueel Klokkijken</h3><p>Met 5-min streepjes</p></div>
+                <div><h3>Klokkijken (iPad)</h3><p>Invoeren als digitale tijd</p></div>
             </div>
             <div class="tile active" id="tile-geld" onclick="toggleTile('geld')">
                 <div class="tile-icon">💶</div>
-                <div><h3>Geldsommen</h3><p>Grote variatie</p></div>
+                <div><h3>Geld tellen</h3><p>Biljetten & munten</p></div>
             </div>
             <div class="tile active" id="tile-redactie" onclick="toggleTile('redactie')">
                 <div class="tile-icon">📝</div>
-                <div><h3>Redactiesommen</h3><p>Contextopdrachten</p></div>
+                <div><h3>Redactiesommen</h3><p>Grote variatie (geen dubbele)</p></div>
             </div>
         </div>
 
@@ -151,9 +155,9 @@
         <div class="config-block" style="display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <p>Gemaakte bladen: <strong id="statsBladen">0</strong></p>
-                <p>Correct beantwoorde sommen: <strong id="statsCorrect">0</strong></p>
+                <p>Totaal behaalde punten: <strong id="statsCorrect">0</strong></p>
             </div>
-            <button class="btn-reset" onclick="resetScores()">Voortgang Wissen 🔄</button>
+            <button class="btn-reset" onclick="resetScoresOnly()">Punten Wissen 🔄</button>
         </div>
     </div>
 
@@ -171,17 +175,44 @@
         selectedCategories: ['splitsen', 'tafels', 'optellen_aftrekken', 'klokkijken', 'geld', 'redactie'],
         sommenPerOefening: 5,
         sommenData: [],
-        xp: parseInt(localStorage.getItem('rekenapp_xp')) || 0,
-        bladenGemaakt: parseInt(localStorage.getItem('rekenapp_bladen')) || 0,
-        totaalCorrect: parseInt(localStorage.getItem('rekenapp_correct')) || 0
+        punten: parseInt(localStorage.getItem('rekenapp_punten')) || 0,
+        bladenGemaakt: parseInt(localStorage.getItem('rekenapp_bladen')) || 0
     };
 
     const niveauNamen = ["Groep 4 (Begin)", "Groep 4 (Midden)", "Groep 5", "Groep 5 / +"];
     
+    // Pool van 24 unieke redactiesommen om duplicaten te voorkomen
+    const redactiePool = [
+        { v: "Bij de bakker liggen {t} broodjes. Er worden er {w} verkocht. Hoeveel broodjes zijn er over?", f: (t, w) => t - w, r: [[40,60], [10,25]] },
+        { v: "Sam fietst {t} kilometer in de ochtend en {w} kilometer in de middag. Hoeveel fietst hij in totaal?", f: (t, w) => t + w, r: [[15,30], [10,20]] },
+        { v: "Er zitten {t} apen in een grote kooi. De oppasser verdeelt ze eerlijk over {w} binnenhokken. Hoeveel apen per hok?", f: (t, w) => t / w, isDeel: true },
+        { v: "Een kaartje voor de dierentuin kost €{w}. Papa koopt {t} kaartjes. Hoeveel kost dit samen?", f: (t, w) => t * w, r: [[3,6], [6,12]] },
+        { v: "In een plonsbassin zwemmen {t} kikkers. Er springen {w} kikkers weg. Hoeveel kikkers blijven er?", f: (t, w) => t - w, r: [[25,45], [8,18]] },
+        { v: "Een doos bevat {t} rode potloden en {w} blauwe potloden. Hoeveel potloden zijn er in totaal?", f: (t, w) => t + w, r: [[30,70], [20,50]] },
+        { v: "In een klas zitten {t} kinderen. Ze maken groepjes van {w}. Hoeveel groepjes kunnen ze maken?", f: (t, w) => t / w, isDeel: true },
+        { v: "Een reep chocola heeft {t} rijen van {w} blokjes. Hoeveel blokjes heeft de reep in totaal?", f: (t, w) => t * w, r: [[4,8], [3,6]] },
+        { v: "Lotte heeft {t} stickers. Ze krijgt er {w} bij voor haar verjaardag. Hoeveel heeft ze er nu?", f: (t, w) => t + w, r: [[50,100], [15,40]] },
+        { v: "Er liggen {t} appels in een krat. {w} appels zijn rot en worden weggegooid. Hoeveel zijn er nog goed?", f: (t, w) => t - w, r: [[60,90], [10,25]] },
+        { v: "In een bibliotheek leent Milan {t} boeken en Tess leent er {w}. Hoeveel boeken zijn dat samen?", f: (t, w) => t + w, r: [[8,15], [5,12]] },
+        { v: "Een bus heeft {t} stoelen. Op {w} stoelen zitten al mensen. Hoeveel stoelen zijn er nog leeg?", f: (t, w) => t - w, r: [[45,60], [20,35]] },
+        { v: "Suus koopt {t} schriften van €{w} per stuk. Hoeveel euro moet zij in totaal betalen?", f: (t, w) => t * w, r: [[3,7], [2,4]] },
+        { v: "Er liggen {t} eieren in de koelkast. De kok gebruikt er {w} voor een grote taart. Hoeveel eieren blijven over?", f: (t, w) => t - w, r: [[20,35], [6,15]] },
+        { v: "Een voetbalteam scoort {t} doelpunten in de eerste helft en {w} in de tweede helft. Wat is de totale score?", f: (t, w) => t + w, r: [[12,24], [5,15]] },
+        { v: "De juf heeft {t} snoepjes. Ze geeft {w} kinderen allemaal evenveel. Hoeveel krijgt ieder kind?", f: (t, w) => t / w, isDeel: true },
+        { v: "In een tuin bloeien {t} zonnebloemen en {w} tulpen. Hoeveel bloemen staan er in de tuin?", f: (t, w) => t + w, r: [[35,65], [25,45]] },
+        { v: "Een bioscoopzaal heeft {t} rijen met elk {w} stoelen. Hoeveel stoelen zijn er in totaal?", f: (t, w) => t * w, r: [[8,12], [8,12]] },
+        { v: "Er vliegen {t} vogels in de lucht. Er landen er {w} in een boom. Hoeveel vogels vliegen er nog?", f: (t, w) => t - w, r: [[30,50], [10,22]] },
+        { v: "Een boer heeft {t} schapen. Hij verdeelt ze gelijk over {w} weides. Hoeveel schapen staan er per weide?", f: (t, w) => t / w, isDeel: true },
+        { v: "In een magazijn staan {t} dozen. Er worden {w} nieuwe dozen bezorgd. Hoeveel dozen staan er nu?", f: (t, w) => t + w, r: [[120,200], [40,90]] },
+        { v: "Een speelgoedauto kost €{w}. De winkel verkoopt er {t} op één dag. Hoeveel levert dit op?", f: (t, w) => t * w, r: [[4,8], [5,15]] },
+        { v: "In een parkvijver zwemmen {t} eenden. Er gaan {w} eenden het water uit. Hoeveel eenden zwemmen er nog?", f: (t, w) => t - w, r: [[40,75], [15,30]] },
+        { v: "Een hardloper rent {t} meter op maandag en {w} meter op dinsdag. Hoeveel meter is dat samen?", f: (t, w) => t + w, r: [[300,600], [200,400]] }
+    ];
+
     function initStats() {
-        document.getElementById('xpDisplay').innerText = state.xp;
+        document.getElementById('xpDisplay').innerText = state.punten;
         document.getElementById('statsBladen').innerText = state.bladenGemaakt;
-        document.getElementById('statsCorrect').innerText = state.totaalCorrect;
+        document.getElementById('statsCorrect').innerText = state.punten;
     }
     window.onload = initStats;
 
@@ -203,10 +234,10 @@
         document.getElementById(`len-${l}`).classList.add('active');
     }
 
-    function resetScores() {
-        if(confirm("Weet je zeker dat je alle scores en opgebouwde XP wilt wissen?")) {
-            state.xp = 0; state.bladenGemaakt = 0; state.totaalCorrect = 0;
-            localStorage.clear();
+    function resetScoresOnly() {
+        if(confirm("Weet je zeker dat je alle behaalde punten wilt resetten naar 0? (Je gemaakte bladen blijven bewaard!)")) {
+            state.punten = 0;
+            localStorage.setItem('rekenapp_punten', 0);
             initStats();
         }
     }
@@ -236,15 +267,28 @@
     }
 
     function genereerGeldHTML(bedrag) {
-        let overig = bedrag;
-        let html = '<div style="margin-bottom:8px; display:flex; flex-wrap:wrap; gap:4px;">';
+        let overig = Math.round(bedrag * 100) / 100;
+        let html = '<div style="margin-bottom:8px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">';
+        
         const eenheden = [
-            {v: 50, c: 'biljet blauw'}, {v: 20, c: 'biljet'}, {v: 10, c: 'biljet'}, {v: 5, c: 'biljet'},
-            {v: 2, c: 'munt'}, {v: 1, c: 'munt zilver'}, {v: 0.5, c: 'munt brons', lbl: '50c'}
+            {v: 50, c: 'biljet blauw', type: 'b'}, 
+            {v: 20, c: 'biljet rood', type: 'b'}, 
+            {v: 10, c: 'biljet', type: 'b'}, 
+            {v: 5, c: 'biljet', type: 'b'},
+            {v: 2, c: 'munt', type: 'm'}, 
+            {v: 1, c: 'munt zilver', type: 'm'}, 
+            {v: 0.5, c: 'munt brons', type: 'm', lbl: '50c'},
+            {v: 0.2, c: 'munt brons', type: 'm', lbl: '20c'},
+            {v: 0.1, c: 'munt brons', type: 'm', lbl: '10c'}
         ];
+        
         eenheden.forEach(e => {
-            while(overig >= e.v) {
-                html += `<span class="geld-item ${e.c}">€${e.lbl || e.v}</span>`;
+            while(overig >= e.v - 0.01) {
+                if (e.type === 'b') {
+                    html += `<span class="geld-item ${e.c}">€${e.v}</span>`;
+                } else {
+                    html += `<span class="geld-item ${e.c}">${e.lbl || '€' + e.v}</span>`;
+                }
                 overig = Math.round((overig - e.v) * 100) / 100;
             }
         });
@@ -252,16 +296,18 @@
         return html;
     }
 
-    function bouwSom(cat) {
-        let vraag = "", antwoord = "", customHTML = "";
+    function bouwSom(cat, gebruikteRedactieIndices) {
+        let vraag = "", antwoord = "", customHTML = "", extraUitleg = "";
         let niv = state.niveau;
 
         switch(cat) {
             case 'splitsen':
-                let top = niv === 0 ? Math.floor(Math.random() * 11) + 10 // 10 t/m 20
-                        : niv === 1 ? Math.floor(Math.random() * 31) + 20 // 20 t/m 50
-                        : Math.floor(Math.random() * 51) + 50;            // 50 t/m 100
-                let l = Math.floor(Math.random() * (top - 4)) + 2;
+                // Hogere getallen en meer uitdaging ingebouwd
+                let top = niv === 0 ? Math.floor(Math.random() * 31) + 20   // 20 t/m 50
+                        : niv === 1 ? Math.floor(Math.random() * 51) + 50   // 50 t/m 100
+                        : niv === 2 ? Math.floor(Math.random() * 151) + 100 // 100 t/m 250
+                        : Math.floor(Math.random() * 501) + 500;            // 500 t/m 1000
+                let l = Math.floor(Math.random() * (top - 6)) + 3;
                 let r = top - l;
                 let linksOnbekend = Math.random() > 0.5;
                 
@@ -271,17 +317,24 @@
                         <div class="splits-top">${top}</div>
                         <div class="splits-takken"></div>
                         <div class="splits-bottom">
-                            <div class="splits-box">${linksOnbekend ? `<input type="text" id="SPLITSMARKER">` : l}</div>
-                            <div class="splits-box">${linksOnbekend ? r : `<input type="text" id="SPLITSMARKER">`}</div>
+                            <div class="splits-box">${linksOnbekend ? `<input type="text" pattern="[0-9]*" inputmode="numeric" id="SPLITSMARKER">` : l}</div>
+                            <div class="splits-box">${linksOnbekend ? r : `<input type="text" pattern="[0-9]*" inputmode="numeric" id="SPLITSMARKER">`}</div>
                         </div>
                     </div>`;
                 break;
 
             case 'tafels':
-                // Tafel van 1 is strikt buitengesloten
-                let geldigeTafels = [2, 5, 10];
-                if(niv === 1) geldigeTafels = [2, 3, 4, 5, 10];
-                if(niv >= 2) geldigeTafels = [3, 4, 6, 7, 8, 9, 11, 12];
+                let geldigeTafels = [];
+                if(niv === 0) {
+                    // Begin groep 4: 2 t/m 10
+                    for(let i=2; i<=10; i++) geldigeTafels.push(i);
+                } else if(niv === 1) {
+                    // Midden groep 4: 2 t/m 15
+                    for(let i=2; i<=15; i++) geldigeTafels.push(i);
+                } else {
+                    // Groep 5 en hoger: 5 t/m 20
+                    for(let i=5; i<=20; i++) geldigeTafels.push(i);
+                }
                 
                 let t = geldigeTafels[Math.floor(Math.random() * geldigeTafels.length)];
                 let m = Math.floor(Math.random() * 10) + 1;
@@ -291,18 +344,18 @@
 
             case 'optellen_aftrekken':
                 if(niv === 0) {
-                    let a = Math.floor(Math.random() * 20) + 10;
-                    let b = Math.floor(Math.random() * 10) + 3;
+                    let a = Math.floor(Math.random() * 30) + 20;
+                    let b = Math.floor(Math.random() * 15) + 5;
                     vraag = Math.random() > 0.5 ? `${a} + ${b} =` : `${a+b} - ${b} =`;
                     antwoord = Math.random() > 0.5 ? (a+b).toString() : a.toString();
                 } else if(niv === 1) {
-                    let a = Math.floor(Math.random() * 60) + 30;
-                    let b = Math.floor(Math.random() * 25) + 8;
+                    let a = Math.floor(Math.random() * 100) + 50;
+                    let b = Math.floor(Math.random() * 40) + 15;
                     vraag = Math.random() > 0.5 ? `${a} + ${b} =` : `${a+b} - ${b} =`;
                     antwoord = Math.random() > 0.5 ? (a+b).toString() : a.toString();
                 } else {
-                    let a = Math.floor(Math.random() * 600) + 150;
-                    let b = Math.floor(Math.random() * 350) + 60;
+                    let a = Math.floor(Math.random() * 700) + 300;
+                    let b = Math.floor(Math.random() * 400) + 100;
                     vraag = Math.random() > 0.5 ? `${a} + ${b} =` : `${a} - ${b} =`;
                     antwoord = Math.random() > 0.5 ? (a+b).toString() : (a-b).toString();
                 }
@@ -316,64 +369,69 @@
                 
                 let min = minutenOpties[Math.floor(Math.random() * minutenOpties.length)];
                 customHTML = genereerKlokHTML(h, min);
-                vraag = "Hoe laat is het op deze wijzerplaat?";
+                vraag = "Hoe laat is het op de klok?";
+                extraUitleg = "Vul in als digitale tijd. Voorbeeld: 08:30 of 11:05";
                 
-                if(min === 0) antwoord = `${h} uur`;
-                else if(min === 30) antwoord = `half ${h === 12 ? 1 : h + 1}`;
-                else if(min === 15) antwoord = `kwart over ${h}`;
-                else if(min === 45) antwoord = `kwart voor ${h === 12 ? 1 : h + 1}`;
-                else if(min === 5) antwoord = `5 over ${h}`;
-                else if(min === 10) antwoord = `10 over ${h}`;
-                else if(min === 20) antwoord = `10 voor half ${h === 12 ? 1 : h + 1}`;
-                else if(min === 25) antwoord = `5 voor half ${h === 12 ? 1 : h + 1}`;
-                else if(min === 35) antwoord = `5 over half ${h === 12 ? 1 : h + 1}`;
-                else if(min === 40) antwoord = `10 over half ${h === 12 ? 1 : h + 1}`;
-                else if(min === 50) antwoord = `10 voor ${h === 12 ? 1 : h + 1}`;
-                else if(min === 55) antwoord = `5 voor ${h === 12 ? 1 : h + 1}`;
+                let hStr = h < 10 ? '0' + h : h.toString();
+                let mStr = min < 10 ? '0' + min : min.toString();
+                antwoord = `${hStr}:${mStr}`;
                 break;
 
             case 'geld':
                 let geldTypes = ['terug', 'portemonnee'];
-                let type = geldTypes[Math.floor(Math.random() * geldTypes.length)];
+                let gType = geldTypes[Math.floor(Math.random() * geldTypes.length)];
                 
-                let budgetOpties = niv === 0 ? [5, 10, 15] : (niv === 1 ? [10, 20, 25] : [20, 40, 50, 75]);
-                let budget = budgetOpties[Math.floor(Math.random() * budgetOpties.length)];
+                // Mix van euro's en wisselend centen om het uitdagend te maken
+                let basisBedragen = niv === 0 ? [5, 10, 12.50, 15] : (niv === 1 ? [15.50, 22, 27.10, 35] : [45.20, 63.50, 78.80, 85]);
+                let totaalGeld = basisBedragen[Math.floor(Math.random() * basisBedragen.length)];
                 
-                if(type === 'terug') {
-                    let uitgave = Math.floor(Math.random() * (budget - 2)) + 1;
-                    customHTML = genereerGeldHTML(budget);
-                    vraag = `Je betaalt een spel van €${uitgave} met dit geld. Hoeveel euro wisselgeld krijg je terug?`;
-                    antwoord = (budget - uitgave).toString();
+                if(gType === 'terug') {
+                    let uitgave = Math.floor(Math.random() * (totaalGeld - 3)) + 1;
+                    if(totaalGeld % 1 !== 0) uitgave += 0.50; // Behoud centenwerk indien aanwezig
+                    customHTML = genereerGeldHTML(totaalGeld);
+                    vraag = `Je koopt iets van €${uitgave.toFixed(2).replace('.', ',')} en betaalt met dit geld. Hoeveel krijg je terug?`;
+                    antwoord = (totaalGeld - uitgave).toFixed(2).replace('.', ',');
                 } else {
-                    customHTML = genereerGeldHTML(budget);
-                    vraag = `Hoeveel geld zit er in totaal in deze portemonnee?`;
-                    antwoord = budget.toString();
+                    customHTML = genereerGeldHTML(totaalGeld);
+                    vraag = `Hoeveel geld zit er in totaal in de portemonnee?`;
+                    antwoord = totaalGeld.toFixed(2).replace('.', ',');
                 }
+                // Strip nutteloze ,00 aan het einde voor makkelijker nakijken
+                if(antwoord.endsWith(',00')) antwoord = antwoord.replace(',00', '');
                 break;
 
             case 'redactie':
-                let contexten = [
-                    { v: "Er staan {t} stoelen in de zaal. De meester haalt er {w} weg. Hoeveel stoelen blijven er over?", f: (t, w) => t - w, r1: [30, 20], r2: [10, 8] },
-                    { v: "Saar heeft {t} knikkers. Ze verdeelt ze eerlijk over {w} zakjes. Hoeveel knikkers zitten er in elk zakje?", f: (t, w) => t / w, r1: [5, 4], r2: [5, 4] },
-                    { v: "Een treinkaartje kost €{w}. Opa koopt {t} kaartjes. Hoeveel moet hij betalen?", f: (t, w) => t * w, r1: [3, 4], r2: [4, 5] },
-                    { v: "In een doos zitten {t} rode en {w} blauwe pennen. Hoeveel pennen zijn dat samen?", f: (t, w) => t + w, r1: [40, 50], r2: [25, 35] }
-                ];
-                let c = contexten[Math.floor(Math.random() * contexten.length)];
-                let t_val = Math.floor(Math.random() * c.r1[0]) + c.r1[1];
-                let w_val = Math.floor(Math.random() * c.r2[0]) + c.r2[1];
-                
-                if(c.v.includes("verdeelt")) t_val = w_val * (Math.floor(Math.random()*4)+2); // Zorg voor hele getallen
+                // Pak een unieke index die nog niet is gebruikt op dit blad
+                let beschikbareIndices = redactiePool.map((_, idx) => idx).filter(idx => !gebruikteRedactieIndices.includes(idx));
+                if(beschikbareIndices.length === 0) {
+                    gebruikteRedactieIndices.length = 0; // reset pool indien leeg
+                    beschikbareIndices = redactiePool.map((_, idx) => idx);
+                }
+                let gekozenIndex = beschikbareIndices[Math.floor(Math.random() * beschikbareIndices.length)];
+                gebruikteRedactieIndices.push(gekozenIndex);
 
-                vraag = c.v.replace("{t}", t_val).replace("{w}", w_val);
-                antwoord = c.f(t_val, w_val).toString();
+                let data = redactiePool[gekozenIndex];
+                let t_val = 0, w_val = 0;
+
+                if(data.isDeel) {
+                    w_val = Math.floor(Math.random() * 4) + 3; // Deel door 3, 4, 5 of 6
+                    t_val = w_val * (Math.floor(Math.random() * 5) + 3); // Zorg voor mooie ronde uitkomsten
+                } else {
+                    t_val = Math.floor(Math.random() * (data.r[0][1] - data.r[0][0])) + data.r[0][0];
+                    w_val = Math.floor(Math.random() * (data.r[1][1] - data.r[1][0])) + data.r[1][0];
+                }
+                
+                vraag = data.v.replace("{t}", t_val).replace("{w}", w_val);
+                antwoord = data.f(t_val, w_val).toString();
                 break;
         }
 
-        return { cat, vraag, antwoord, customHTML };
+        return { cat, vraag, antwoord, customHTML, extraUitleg };
     }
 
     function genereerWerkblad() {
         state.sommenData = [];
+        let gebruikteRedactieIndices = [];
         const container = document.getElementById('worksheetContainer');
         container.innerHTML = `<h2 style="margin-bottom:15px;">Mijn Rekenblad (${niveauNamen[state.niveau]})</h2>`;
 
@@ -382,7 +440,7 @@
             block.innerHTML = `<div class="category-header">${cat.toUpperCase()}</div>`;
             
             for(let i=0; i<state.sommenPerOefening; i++) {
-                let s = bouwSom(cat);
+                let s = bouwSom(cat, gebruikteRedactieIndices);
                 let idx = state.sommenData.length;
                 state.sommenData.push(s);
 
@@ -390,15 +448,28 @@
                 row.className = "som-row";
                 row.id = `somrow-${idx}`;
 
+                // iPad optimalisatie: pattern en inputmode forceren numeriek toetsenbord
+                let inputTypeAttributes = 'type="text" pattern="[0-9]*" inputmode="numeric"';
+                if(s.cat === 'klokkijken') {
+                    inputTypeAttributes = 'type="text" placeholder="uu:mm"'; // Klok vereist de dubbele punt
+                } else if(s.cat === 'geld') {
+                    inputTypeAttributes = 'type="text" placeholder="0,00"';
+                }
+
                 if(s.cat === 'splitsen') {
                     row.innerHTML = s.customHTML.replace('id="SPLITSMARKER"', `id="input-${idx}"`);
                 } else {
                     row.innerHTML = `
-                        <div style="display:flex; align-items:center;">
-                            ${s.customHTML ? s.customHTML : ''}
-                            <div class="som-body">
-                                <div class="som-vraag">${s.vraag}</div>
-                                <input type="text" class="som-input" id="input-${idx}">
+                        <div style="display:flex; flex-direction:column; width:100%;">
+                            <div style="display:flex; align-items:center; width:100%;">
+                                ${s.customHTML ? s.customHTML : ''}
+                                <div class="som-body">
+                                    <div class="som-vraag">
+                                        ${s.vraag}
+                                        ${s.extraUitleg ? `<div class="som-uitleg">${s.extraUitleg}</div>` : ''}
+                                    </div>
+                                    <input ${inputTypeAttributes} class="som-input" id="input-${idx}">
+                                </div>
                             </div>
                         </div>`;
                 }
@@ -415,8 +486,12 @@
     function nakijkenWerkblad() {
         let goed = 0;
         state.sommenData.forEach((s, idx) => {
-            let inp = document.getElementById(`input-${idx}`).value.trim().toLowerCase();
-            let isCorrect = inp === s.antwoord.toLowerCase() || inp === `€${s.antwoord}`;
+            let inp = document.getElementById(`input-${idx}`).value.trim().toLowerCase().replace('.', ',');
+            let target = s.antwoord.toLowerCase();
+            
+            // Flexibele checks voor eurotekens
+            let isCorrect = (inp === target) || (inp === `€${target}`) || (inp === `€ ${target}`);
+            
             let row = document.getElementById(`somrow-${idx}`);
             
             if(isCorrect) {
@@ -427,23 +502,21 @@
                 let info = document.createElement('div');
                 info.style.color = "var(--danger)";
                 info.style.fontWeight = "bold";
+                info.style.marginTop = "8px";
                 info.innerText = `Goed antwoord: ${s.antwoord}`;
                 row.appendChild(info);
             }
         });
 
-        // XP en score toevoegen
-        let verdiendeXp = goed * 10;
-        state.xp += verdiendeXp;
+        // Alleen punten worden verhoogd (1 punt per goed antwoord)
+        state.punten += goed;
         state.bladenGemaakt += 1;
-        state.totaalCorrect += goed;
 
-        localStorage.setItem('rekenapp_xp', state.xp);
+        localStorage.setItem('rekenapp_punten', state.punten);
         localStorage.setItem('rekenapp_bladen', state.bladenGemaakt);
-        localStorage.setItem('rekenapp_correct', state.totaalCorrect);
         initStats();
 
-        alert(`Gecontroleerd! Je hebt ${goed} van de ${state.sommenData.length} sommen goed gemaakt. Je verdient +${verdiendeXp} XP!`);
+        alert(`Blad gecontroleerd! Je hebt ${goed} van de ${state.sommenData.length} sommen goed gemaakt. Je krijgt er +${goed} ${goed === 1 ? 'punt' : 'punten'} bij!`);
         
         document.getElementById('btnControleer').style.display = "none";
         document.getElementById('btnNaarScore').style.display = "block";
@@ -463,6 +536,7 @@
         element.innerHTML = `<h2>RekenApp Werkblad - ${niveauNamen[state.niveau]}</h2><p>Naam: ________________________ Datum: ______________</p><hr style="margin:20px 0;">`;
 
         let antwoorden = [];
+        let dummyRedactie = [];
         state.selectedCategories.forEach(cat => {
             let title = document.createElement('h3');
             title.style.margin = "20px 0 10px 0";
@@ -471,7 +545,7 @@
             element.appendChild(title);
 
             for(let i=0; i<state.sommenPerOefening; i++) {
-                let s = bouwSom(cat);
+                let s = bouwSom(cat, dummyRedactie);
                 antwoorden.push(s.antwoord);
                 let item = document.createElement('div');
                 item.style.border = "1px solid #e0e5f2";
@@ -479,9 +553,9 @@
                 item.style.marginBottom = "8px";
                 
                 if(s.cat === 'splitsen') {
-                    item.innerHTML = s.customHTML.replace('<input type="text" id="SPLITSMARKER">', '___');
+                    item.innerHTML = s.customHTML.replace('<input type="text" pattern="[0-9]*" inputmode="numeric" id="SPLITSMARKER">', '___');
                 } else {
-                    item.innerHTML = `<div style="display:flex; align-items:center;">${s.customHTML || ''}<div><strong>${s.vraag}</strong><br>Antwoord: ....................</div></div>`;
+                    item.innerHTML = `<div style="display:flex; align-items:center;">${s.customHTML || ''}<div><strong>${s.vraag}</strong>${s.extraUitleg ? `<br><small>${s.extraUitleg}</small>` : ''}<br>Antwoord: ....................</div></div>`;
                 }
                 element.appendChild(item);
             }
