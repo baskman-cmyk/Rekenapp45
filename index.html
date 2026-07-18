@@ -2,15 +2,9 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>Smarter RekenApp Pro - Groep 4 & 5</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- html2pdf Library voor PDF generatie -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smarter RekenApp Pro v3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
     <style>
         :root {
             --bg-main: #f4f7fe;
@@ -24,79 +18,65 @@
             --border: #e0e5f2;
             --radius-lg: 20px;
             --radius-md: 12px;
-            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; }
-
-        .app-window { width: 100%; max-width: 768px; min-height: 100vh; background-color: var(--bg-main); display: flex; flex-direction: column; position: relative; padding-bottom: 90px; }
-
-        /* Top Bar Navigation */
+        .app-window { width: 100%; max-width: 768px; display: flex; flex-direction: column; padding-bottom: 40px; }
+        
         .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; background: var(--bg-card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
-        .profile-area { display: flex; align-items: center; gap: 14px; }
-        .btn-home { background: var(--primary-light); color: var(--primary); border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; }
-        .score-badge { background: #fff3e0; color: #ff9800; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 15px; }
+        .btn-home { background: var(--primary-light); color: var(--primary); border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        .score-badge { background: #fff3e0; color: #ff9800; padding: 8px 14px; border-radius: 20px; font-weight: 700; }
 
-        /* Views */
-        .view { display: none; flex-direction: column; flex: 1; padding: 24px; }
+        .view { display: none; flex-direction: column; padding: 24px; }
         .view.active { display: flex; }
         .section-title { font-size: 20px; font-weight: 800; margin: 20px 0 10px 0; }
-        .sub-text { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
 
-        /* Dashboard Grid & Cards */
         .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 20px; }
-        .tile { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; display: flex; align-items: center; gap: 14px; height: 90px; cursor: pointer; transition: all 0.2s; }
+        .tile { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; display: flex; align-items: center; gap: 14px; height: 90px; cursor: pointer; }
         .tile.active { border-color: var(--primary); background-color: #f9f8ff; }
         .tile-icon { font-size: 24px; width: 44px; height: 44px; background: var(--bg-main); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
-        
+
         .config-block { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
-        .config-block h4 { margin-bottom: 12px; font-size: 14px; font-weight: 700; }
-
-        /* Knoppen & Selecties */
-        .btn-group { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
-        .btn-sub { flex: 1; min-width: 65px; padding: 12px; background: var(--bg-main); border: 1px solid transparent; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; text-align: center; }
-        .btn-sub.active { background: var(--primary); color: white; }
-        .btn-action { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 700; font-size: 17px; cursor: pointer; width: 100%; text-align: center; margin-top: 10px; }
-        .btn-pdf { background: #2563eb; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
-
-        /* Level Slider */
-        .level-slider { width: 100%; margin: 10px 0; -webkit-appearance: none; height: 8px; border-radius: 5px; background: #e0e5f2; outline: none; }
+        .level-slider { width: 100%; margin: 10px 0; -webkit-appearance: none; height: 8px; border-radius: 5px; background: #e0e5f2; }
         .level-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); cursor: pointer; }
-        .level-labels { display: flex; justify-content: space-between; margin-top: 5px; font-size: 12px; font-weight: 700; color: var(--primary); }
+        .level-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--primary); }
 
-        /* --- VISUELE COMPONENTEN (DE JUISTE VORMGEVING) --- */
+        .btn-group { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
+        .btn-sub { flex: 1; min-width: 50px; padding: 12px; background: var(--bg-main); border: none; border-radius: 10px; font-weight: 700; cursor: pointer; text-align: center; }
+        .btn-sub.active { background: var(--primary); color: white; }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-reset { background: var(--danger); color: white; padding: 8px 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 12px; }
+
+        /* VISUELE CLOK MET 5-MINUTEN STREEPJES */
+        .klok-container { position: relative; width: 120px; height: 120px; margin-right: 20px; flex-shrink: 0; }
+        .klok-analoog { width: 100%; height: 100%; border: 4px solid var(--text-main); border-radius: 50%; position: relative; background: #fff; }
+        .klok-center { width: 8px; height: 8px; background: #000; border-radius: 50%; position: absolute; top: 52px; left: 52px; z-index: 10; }
+        .wijzer-lang { width: 3px; height: 48px; background: #000; position: absolute; bottom: 50%; left: 54.5px; transform-origin: bottom center; z-index: 5; }
+        .wijzer-kort { width: 5px; height: 34px; background: var(--primary); position: absolute; bottom: 50%; left: 53.5px; transform-origin: bottom center; z-index: 6; }
+        .klok-streepje { position: absolute; width: 2px; height: 6px; background: #a3aed0; top: 0; left: 55px; transform-origin: 1px 56px; }
+        .klok-streepje.hoofd { height: 10px; background: var(--text-main); width: 3px; left: 54.5px; }
+
+        /* RESTE VAN DE VORMGEVING */
         .category-header { background: var(--primary-light); color: var(--primary); padding: 12px 18px; border-radius: 10px; font-size: 16px; font-weight: 800; margin: 24px 0 12px 0; border-left: 5px solid var(--primary); }
-        .worksheet-container { display: flex; flex-direction: column; gap: 16px; }
-        
-        .som-row { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+        .som-row { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 12px; }
         .som-body { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 16px; }
-        .som-vraag { font-size: 16px; font-weight: 700; flex: 1; }
-        .som-input-wrapper { display: flex; align-items: center; gap: 8px; }
-        .som-input { width: 90px; height: 44px; border-radius: 8px; border: 2px solid var(--border); background: var(--bg-main); font-size: 16px; text-align: center; font-weight: 700; outline: none; }
+        .som-vraag { font-size: 15px; font-weight: 700; flex: 1; }
+        .som-input { width: 100px; height: 44px; border-radius: 8px; border: 2px solid var(--border); background: var(--bg-main); font-size: 16px; text-align: center; font-weight: 700; outline: none; }
         .som-input:focus { border-color: var(--primary); background: #fff; }
-        
-        /* Oude vertrouwde Splitsboom CSS */
-        .splitsboom-wrapper { display: flex; flex-direction: column; align-items: center; margin: 10px auto; width: 140px; }
-        .splits-top { width: 50px; height: 50px; border-radius: 50%; border: 3px solid var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; background: #fff; }
+
+        .splitsboom-wrapper { display: flex; flex-direction: column; align-items: center; margin: 10px auto; width: 150px; }
+        .splits-top { width: 54px; height: 54px; border-radius: 50%; border: 3px solid var(--text-main); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; background: #fff; }
         .splits-takken { display: flex; justify-content: space-between; width: 90px; height: 30px; border-left: 3px solid var(--text-main); border-right: 3px solid var(--text-main); border-top: 3px solid var(--text-main); margin: 2px 0; }
-        .splits-bottom { display: flex; justify-content: space-between; width: 130px; }
-        .splits-box { width: 46px; height: 46px; border: 3px solid var(--text-main); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; background: #fff; }
-        .splits-box input { width: 100%; height: 100%; border: none; text-align: center; font-size: 16px; font-weight: 700; outline: none; }
+        .splits-bottom { display: flex; justify-content: space-between; width: 140px; }
+        .splits-box { width: 50px; height: 50px; border: 3px solid var(--text-main); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; background: #fff; overflow: hidden; }
+        .splits-box input { width: 100%; height: 100%; border: none; text-align: center; font-size: 16px; font-weight: 700; outline: none; background: var(--bg-main); }
 
-        /* Analoge Wijzerplaat CSS */
-        .klok-analoog { width: 100px; height: 100px; border: 4px solid var(--text-main); border-radius: 50%; position: relative; background: #fff; margin-right: 20px; flex-shrink: 0; }
-        .klok-center { width: 8px; height: 8px; background: #000; border-radius: 50%; position: absolute; top: 46px; left: 46px; z-index: 10; }
-        .wijzer-lang { width: 4px; height: 40px; background: #000; position: absolute; bottom: 50%; left: 48px; transform-origin: bottom center; z-index: 5; }
-        .wijzer-kort { width: 6px; height: 28px; background: var(--primary); position: absolute; bottom: 50%; left: 47px; transform-origin: bottom center; z-index: 6; }
-        .klok-getal { position: absolute; font-size: 10px; font-weight: 800; width: 10px; text-align: center; }
-        .g12 { top: 2px; left: 45px; } .g3 { right: 4px; top: 41px; } .g6 { bottom: 2px; left: 45px; } .g9 { left: 4px; top: 41px; }
-
-        /* Geld Displays */
-        .geld-item { display: inline-flex; align-items: center; justify-content: center; margin: 3px; font-weight: 700; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .munt { width: 32px; height: 32px; border-radius: 50%; background: #ffd700; border: 2px solid #daa520; color: #553c00; }
+        .geld-item { display: inline-flex; align-items: center; justify-content: center; margin: 3px; font-weight: 700; font-size: 12px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .munt { width: 34px; height: 34px; border-radius: 50%; background: #ffd700; border: 2px solid #daa520; color: #553c00; }
         .munt.brons { background: #cd7f32; border-color: #8b5a2b; color: #fff; }
-        .biljet { width: 55px; height: 32px; border-radius: 4px; background: #85bb65; border: 2px solid #557a3e; color: #fff; }
+        .munt.zilver { background: #e6e6e6; border-color: #b3b3b3; color: #333; }
+        .biljet { width: 58px; height: 34px; border-radius: 4px; background: #85bb65; border: 2px solid #557a3e; color: #fff; }
+        .biljet.blauw { background: #2563eb; border-color: #1d4ed8; }
 
         .som-row.correct { border-color: var(--success); background: #e6fcf5; }
         .som-row.incorrect { border-color: var(--danger); background: #fff5f5; }
@@ -106,16 +86,14 @@
 
 <div class="app-window">
     <div class="top-nav">
-        <div class="profile-area">
-            <button class="btn-home" onclick="terugNaarHome()">🏠 Home</button>
-            <div style="margin-left:10px;">
-                <h4 id="appLevelTitle">Groep 4 (Midden)</h4>
-            </div>
+        <div>
+            <button class="btn-home" onclick="terugNaarHome()">🏠 Dashboard</button>
+            <span id="appLevelTitle" style="margin-left:10px; font-weight:800;">Groep 4 (Midden)</span>
         </div>
-        <div class="score-badge">🏆 <span id="xpDisplay">0</span></div>
+        <div class="score-badge">🏆 Totale XP: <span id="xpDisplay">0</span></div>
     </div>
 
-    <!-- VIEW 1: CONFIGURATIE -->
+    <!-- DASHBOARD VIEW -->
     <div id="view-dashboard" class="view active">
         <div class="section-title" style="margin-top:5px;">1. Kies het Niveau 📊</div>
         <div class="config-block">
@@ -136,56 +114,77 @@
             </div>
             <div class="tile active" id="tile-tafels" onclick="toggleTile('tafels')">
                 <div class="tile-icon">✖️</div>
-                <div><h3>Tafels</h3><p>Vermenigvuldigen</p></div>
+                <div><h3>Tafels</h3><p>Zonder tafel van 1</p></div>
             </div>
             <div class="tile active" id="tile-optellen_aftrekken" onclick="toggleTile('optellen_aftrekken')">
                 <div class="tile-icon">➕</div>
-                <div><h3>Basisbewerkingen</h3><p>Plus & min sommen</p></div>
+                <div><h3>Basisbewerkingen</h3><p>Plus- en minsommen</p></div>
             </div>
             <div class="tile active" id="tile-klokkijken" onclick="toggleTile('klokkijken')">
                 <div class="tile-icon">🕒</div>
-                <div><h3>Visueel Klokkijken</h3><p>Met wijzerplaten</p></div>
+                <div><h3>Visueel Klokkijken</h3><p>Met 5-min streepjes</p></div>
             </div>
             <div class="tile active" id="tile-geld" onclick="toggleTile('geld')">
                 <div class="tile-icon">💶</div>
-                <div><h3>Geldsommen</h3><p>Munten & biljetten</p></div>
+                <div><h3>Geldsommen</h3><p>Grote variatie</p></div>
             </div>
             <div class="tile active" id="tile-redactie" onclick="toggleTile('redactie')">
                 <div class="tile-icon">📝</div>
-                <div><h3>Redactiesommen</h3><p>Verhaaltjes op niveau</p></div>
+                <div><h3>Redactiesommen</h3><p>Contextopdrachten</p></div>
             </div>
         </div>
 
         <div class="config-block">
             <h4>Aantal opdrachten per onderdeel:</h4>
-            <div class="btn-group">
-                <button class="btn-sub active" id="len-5" onclick="setLength(5)">5 sommen</button>
-                <button class="btn-sub" id="len-10" onclick="setLength(10)">10 sommen</button>
+            <div class="btn-group" style="margin-top:10px;">
+                <button class="btn-sub active" id="len-5" onclick="setLength(5)">5</button>
+                <button class="btn-sub" id="len-10" onclick="setLength(10)">10</button>
+                <button class="btn-sub" id="len-15" onclick="setLength(15)">15</button>
+                <button class="btn-sub" id="len-20" onclick="setLength(20)">20</button>
             </div>
         </div>
 
         <button class="btn-action" onclick="genereerWerkblad()">Digitaal Oefenblad Openen 🚀</button>
-        <button class="btn-action btn-pdf" onclick="genereerPDF()">Als PDF downloaden (Met Antwoorden) 📄</button>
+        <button class="btn-action" style="background:#2563eb;" onclick="genereerPDF()">PDF Downloaden (Met Antwoorden) 📄</button>
+
+        <div class="section-title">3. Voortgang & Statistieken 📈</div>
+        <div class="config-block" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <p>Gemaakte bladen: <strong id="statsBladen">0</strong></p>
+                <p>Correct beantwoorde sommen: <strong id="statsCorrect">0</strong></p>
+            </div>
+            <button class="btn-reset" onclick="resetScores()">Voortgang Wissen 🔄</button>
+        </div>
     </div>
 
-    <!-- VIEW 2: HET DIGITALE WERKBLAD -->
+    <!-- WERKBLAD VIEW -->
     <div id="view-werkblad" class="view">
         <div id="worksheetContainer"></div>
         <button class="btn-action" id="btnControleer" onclick="nakijkenWerkblad()">Werkblad Controleren ✔️</button>
-        <button class="btn-action" id="btnNaarScore" style="background:#ff9800; display:none;" onclick="switchView('dashboard')">Terug naar Dashboard 🏠</button>
+        <button class="btn-action" id="btnNaarScore" style="background:#ff9800; display:none;" onclick="terugNaarHome()">Naar Dashboard & Voortgang 🏠</button>
     </div>
 </div>
 
 <script>
     let state = {
-        niveau: 1, // 0: Begin 4, 1: Midden 4, 2: Groep 5, 3: Groep 5/+
+        niveau: 1,
         selectedCategories: ['splitsen', 'tafels', 'optellen_aftrekken', 'klokkijken', 'geld', 'redactie'],
         sommenPerOefening: 5,
-        sommenData: []
+        sommenData: [],
+        xp: parseInt(localStorage.getItem('rekenapp_xp')) || 0,
+        bladenGemaakt: parseInt(localStorage.getItem('rekenapp_bladen')) || 0,
+        totaalCorrect: parseInt(localStorage.getItem('rekenapp_correct')) || 0
     };
 
     const niveauNamen = ["Groep 4 (Begin)", "Groep 4 (Midden)", "Groep 5", "Groep 5 / +"];
     
+    function initStats() {
+        document.getElementById('xpDisplay').innerText = state.xp;
+        document.getElementById('statsBladen').innerText = state.bladenGemaakt;
+        document.getElementById('statsCorrect').innerText = state.totaalCorrect;
+    }
+    window.onload = initStats;
+
     function updateNiveauLabel() {
         state.niveau = parseInt(document.getElementById('levelSlider').value);
         document.getElementById('appLevelTitle').innerText = niveauNamen[state.niveau];
@@ -204,32 +203,49 @@
         document.getElementById(`len-${l}`).classList.add('active');
     }
 
+    function resetScores() {
+        if(confirm("Weet je zeker dat je alle scores en opgebouwde XP wilt wissen?")) {
+            state.xp = 0; state.bladenGemaakt = 0; state.totaalCorrect = 0;
+            localStorage.clear();
+            initStats();
+        }
+    }
+
     function genereerKlokHTML(u, m) {
         let uDeg = (u * 30) + (m * 0.5);
         let mDeg = m * 6;
+        let streepjesHTML = '';
+        
+        for(let i=0; i<12; i++) {
+            let rot = i * 30;
+            streepjesHTML += `<div class="klok-streepje hoofd" style="transform: rotate(${rot}deg);"></div>`;
+            for(let j=1; j<=4; j++) {
+                streepjesHTML += `<div class="klok-streepje" style="transform: rotate(${rot + (j*6)}deg);"></div>`;
+            }
+        }
+
         return `
-            <div class="klok-analoog">
-                <div class="klok-center"></div>
-                <div class="wijzer-lang" style="transform: rotate(${mDeg}deg);"></div>
-                <div class="wijzer-kort" style="transform: rotate(${uDeg}deg);"></div>
-                <div class="klok-getal g12">12</div>
-                <div class="klok-getal g3">3</div>
-                <div class="klok-getal g6">6</div>
-                <div class="klok-getal g9">9</div>
+            <div class="klok-container">
+                <div class="klok-analoog">
+                    ${streepjesHTML}
+                    <div class="klok-center"></div>
+                    <div class="wijzer-lang" style="transform: rotate(${mDeg}deg);"></div>
+                    <div class="wijzer-kort" style="transform: rotate(${uDeg}deg);"></div>
+                </div>
             </div>`;
     }
 
     function genereerGeldHTML(bedrag) {
         let overig = bedrag;
-        let html = '<div style="margin-bottom:8px;">';
+        let html = '<div style="margin-bottom:8px; display:flex; flex-wrap:wrap; gap:4px;">';
         const eenheden = [
-            {v: 50, t: 'B', c: 'biljet'}, {v: 20, t: 'B', c: 'biljet'}, {v: 10, t: 'B', c: 'biljet'}, {v: 5, t: 'B', c: 'biljet'},
-            {v: 2, t: 'M', c: 'munt'}, {v: 1, t: 'M', c: 'munt'}
+            {v: 50, c: 'biljet blauw'}, {v: 20, c: 'biljet'}, {v: 10, c: 'biljet'}, {v: 5, c: 'biljet'},
+            {v: 2, c: 'munt'}, {v: 1, c: 'munt zilver'}, {v: 0.5, c: 'munt brons', lbl: '50c'}
         ];
         eenheden.forEach(e => {
             while(overig >= e.v) {
-                html += `<span class="geld-item ${e.c}">€${e.v}</span>`;
-                overig -= e.v;
+                html += `<span class="geld-item ${e.c}">€${e.lbl || e.v}</span>`;
+                overig = Math.round((overig - e.v) * 100) / 100;
             }
         });
         html += '</div>';
@@ -242,10 +258,10 @@
 
         switch(cat) {
             case 'splitsen':
-                let top = niv === 0 ? Math.floor(Math.random() * 6) + 5  // t/m 10
-                        : niv === 1 ? Math.floor(Math.random() * 11) + 10 // t/m 20
-                        : Math.floor(Math.random() * 31) + 20;            // 20 t/m 50 (Groep 5)
-                let l = Math.floor(Math.random() * (top - 2)) + 1;
+                let top = niv === 0 ? Math.floor(Math.random() * 11) + 10 // 10 t/m 20
+                        : niv === 1 ? Math.floor(Math.random() * 31) + 20 // 20 t/m 50
+                        : Math.floor(Math.random() * 51) + 50;            // 50 t/m 100
+                let l = Math.floor(Math.random() * (top - 4)) + 2;
                 let r = top - l;
                 let linksOnbekend = Math.random() > 0.5;
                 
@@ -262,9 +278,12 @@
                 break;
 
             case 'tafels':
-                let t = [1,2,5,10][Math.floor(Math.random()*4)];
-                if(niv >= 1) t = [2,3,4,5,10][Math.floor(Math.random()*5)];
-                if(niv >= 2) t = [6,7,8,9,11,12][Math.floor(Math.random()*6)];
+                // Tafel van 1 is strikt buitengesloten
+                let geldigeTafels = [2, 5, 10];
+                if(niv === 1) geldigeTafels = [2, 3, 4, 5, 10];
+                if(niv >= 2) geldigeTafels = [3, 4, 6, 7, 8, 9, 11, 12];
+                
+                let t = geldigeTafels[Math.floor(Math.random() * geldigeTafels.length)];
                 let m = Math.floor(Math.random() * 10) + 1;
                 vraag = `${m} × ${t} =`;
                 antwoord = (m * t).toString();
@@ -272,18 +291,18 @@
 
             case 'optellen_aftrekken':
                 if(niv === 0) {
-                    let a = Math.floor(Math.random() * 15) + 5;
-                    let b = Math.floor(Math.random() * 10) + 2;
+                    let a = Math.floor(Math.random() * 20) + 10;
+                    let b = Math.floor(Math.random() * 10) + 3;
                     vraag = Math.random() > 0.5 ? `${a} + ${b} =` : `${a+b} - ${b} =`;
                     antwoord = Math.random() > 0.5 ? (a+b).toString() : a.toString();
                 } else if(niv === 1) {
-                    let a = Math.floor(Math.random() * 60) + 20;
-                    let b = Math.floor(Math.random() * 30) + 9; // over honderdtal heen
+                    let a = Math.floor(Math.random() * 60) + 30;
+                    let b = Math.floor(Math.random() * 25) + 8;
                     vraag = Math.random() > 0.5 ? `${a} + ${b} =` : `${a+b} - ${b} =`;
                     antwoord = Math.random() > 0.5 ? (a+b).toString() : a.toString();
                 } else {
-                    let a = Math.floor(Math.random() * 500) + 100;
-                    let b = Math.floor(Math.random() * 300) + 50;
+                    let a = Math.floor(Math.random() * 600) + 150;
+                    let b = Math.floor(Math.random() * 350) + 60;
                     vraag = Math.random() > 0.5 ? `${a} + ${b} =` : `${a} - ${b} =`;
                     antwoord = Math.random() > 0.5 ? (a+b).toString() : (a-b).toString();
                 }
@@ -291,40 +310,62 @@
 
             case 'klokkijken':
                 let h = Math.floor(Math.random() * 12) + 1;
-                let min = 0;
-                if(niv === 1) min = Math.random() > 0.5 ? 0 : 30;
-                if(niv >= 2) min = [0, 15, 30, 45][Math.floor(Math.random() * 4)];
+                let minutenOpties = [0, 30];
+                if(niv === 1) minutenOpties = [0, 15, 30, 45];
+                if(niv >= 2) minutenOpties = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
                 
+                let min = minutenOpties[Math.floor(Math.random() * minutenOpties.length)];
                 customHTML = genereerKlokHTML(h, min);
-                vraag = "Hoe laat is het op deze klok?";
+                vraag = "Hoe laat is het op deze wijzerplaat?";
                 
                 if(min === 0) antwoord = `${h} uur`;
                 else if(min === 30) antwoord = `half ${h === 12 ? 1 : h + 1}`;
                 else if(min === 15) antwoord = `kwart over ${h}`;
                 else if(min === 45) antwoord = `kwart voor ${h === 12 ? 1 : h + 1}`;
+                else if(min === 5) antwoord = `5 over ${h}`;
+                else if(min === 10) antwoord = `10 over ${h}`;
+                else if(min === 20) antwoord = `10 voor half ${h === 12 ? 1 : h + 1}`;
+                else if(min === 25) antwoord = `5 voor half ${h === 12 ? 1 : h + 1}`;
+                else if(min === 35) antwoord = `5 over half ${h === 12 ? 1 : h + 1}`;
+                else if(min === 40) antwoord = `10 over half ${h === 12 ? 1 : h + 1}`;
+                else if(min === 50) antwoord = `10 voor ${h === 12 ? 1 : h + 1}`;
+                else if(min === 55) antwoord = `5 voor ${h === 12 ? 1 : h + 1}`;
                 break;
 
             case 'geld':
-                let basis = niv === 0 ? 10 : (niv === 1 ? 20 : 50);
-                let prijs = Math.floor(Math.random() * (basis - 4)) + 3;
-                customHTML = genereerGeldHTML(basis);
-                vraag = `Je betaalt een artikel van €${prijs} met dit geld. Hoeveel krijg je terug?`;
-                antwoord = (basis - prijs).toString();
+                let geldTypes = ['terug', 'portemonnee'];
+                let type = geldTypes[Math.floor(Math.random() * geldTypes.length)];
+                
+                let budgetOpties = niv === 0 ? [5, 10, 15] : (niv === 1 ? [10, 20, 25] : [20, 40, 50, 75]);
+                let budget = budgetOpties[Math.floor(Math.random() * budgetOpties.length)];
+                
+                if(type === 'terug') {
+                    let uitgave = Math.floor(Math.random() * (budget - 2)) + 1;
+                    customHTML = genereerGeldHTML(budget);
+                    vraag = `Je betaalt een spel van €${uitgave} met dit geld. Hoeveel euro wisselgeld krijg je terug?`;
+                    antwoord = (budget - uitgave).toString();
+                } else {
+                    customHTML = genereerGeldHTML(budget);
+                    vraag = `Hoeveel geld zit er in totaal in deze portemonnee?`;
+                    antwoord = budget.toString();
+                }
                 break;
 
             case 'redactie':
-                let namen = ["Bram", "Lieke", "Daan", "Mila"];
-                let n = namen[Math.floor(Math.random()*namen.length)];
-                if(niv <= 1) {
-                    let dozen = Math.floor(Math.random() * 3) + 3;
-                    vraag = `${n} heeft ${dozen} dozen. In elke doos zitten 5 koekjes. Hoeveel koekjes zijn er in totaal?`;
-                    antwoord = (dozen * 5).toString();
-                } else {
-                    let totaal = Math.floor(Math.random() * 40) + 60;
-                    let weg = Math.floor(Math.random() * 25) + 15;
-                    vraag = `Er zijn ${totaal} passagiers in de trein. Bij het eerste station stappen er ${weg} uit, en komen er 7 bij. Hoeveel zijn er nu?`;
-                    antwoord = (totaal - weg + 7).toString();
-                }
+                let contexten = [
+                    { v: "Er staan {t} stoelen in de zaal. De meester haalt er {w} weg. Hoeveel stoelen blijven er over?", f: (t, w) => t - w, r1: [30, 20], r2: [10, 8] },
+                    { v: "Saar heeft {t} knikkers. Ze verdeelt ze eerlijk over {w} zakjes. Hoeveel knikkers zitten er in elk zakje?", f: (t, w) => t / w, r1: [5, 4], r2: [5, 4] },
+                    { v: "Een treinkaartje kost €{w}. Opa koopt {t} kaartjes. Hoeveel moet hij betalen?", f: (t, w) => t * w, r1: [3, 4], r2: [4, 5] },
+                    { v: "In een doos zitten {t} rode en {w} blauwe pennen. Hoeveel pennen zijn dat samen?", f: (t, w) => t + w, r1: [40, 50], r2: [25, 35] }
+                ];
+                let c = contexten[Math.floor(Math.random() * contexten.length)];
+                let t_val = Math.floor(Math.random() * c.r1[0]) + c.r1[1];
+                let w_val = Math.floor(Math.random() * c.r2[0]) + c.r2[1];
+                
+                if(c.v.includes("verdeelt")) t_val = w_val * (Math.floor(Math.random()*4)+2); // Zorg voor hele getallen
+
+                vraag = c.v.replace("{t}", t_val).replace("{w}", w_val);
+                antwoord = c.f(t_val, w_val).toString();
                 break;
         }
 
@@ -349,17 +390,14 @@
                 row.className = "som-row";
                 row.id = `somrow-${idx}`;
 
-                let dynamicContent = s.customHTML;
                 if(s.cat === 'splitsen') {
-                    // Injecteer uniek ID in de splitsboom input
-                    dynamicContent = dynamicContent.replace('id="SPLITSMARKER"', `id="input-${idx}" class="som-input"`);
-                    row.innerHTML = dynamicContent;
+                    row.innerHTML = s.customHTML.replace('id="SPLITSMARKER"', `id="input-${idx}"`);
                 } else {
                     row.innerHTML = `
-                        ${dynamicContent ? dynamicContent : ''}
-                        <div class="som-body">
-                            <div class="som-vraag">${s.vraag}</div>
-                            <div class="som-input-wrapper">
+                        <div style="display:flex; align-items:center;">
+                            ${s.customHTML ? s.customHTML : ''}
+                            <div class="som-body">
+                                <div class="som-vraag">${s.vraag}</div>
                                 <input type="text" class="som-input" id="input-${idx}">
                             </div>
                         </div>`;
@@ -378,7 +416,7 @@
         let goed = 0;
         state.sommenData.forEach((s, idx) => {
             let inp = document.getElementById(`input-${idx}`).value.trim().toLowerCase();
-            let isCorrect = inp === s.antwoord.toLowerCase();
+            let isCorrect = inp === s.antwoord.toLowerCase() || inp === `€${s.antwoord}`;
             let row = document.getElementById(`somrow-${idx}`);
             
             if(isCorrect) {
@@ -386,17 +424,27 @@
                 goed++;
             } else {
                 row.classList.add('incorrect');
-                // Voeg antwoordlabel toe
-                let label = document.createElement('div');
-                label.style.color = "var(--danger)";
-                label.style.fontWeight = "bold";
-                label.style.fontSize = "13px";
-                label.innerText = `Goed antwoord: ${s.antwoord}`;
-                row.appendChild(label);
+                let info = document.createElement('div');
+                info.style.color = "var(--danger)";
+                info.style.fontWeight = "bold";
+                info.innerText = `Goed antwoord: ${s.antwoord}`;
+                row.appendChild(info);
             }
         });
 
-        alert(`Werkblad gecontroleerd! Je score: ${goed} van de ${state.sommenData.length} goed!`);
+        // XP en score toevoegen
+        let verdiendeXp = goed * 10;
+        state.xp += verdiendeXp;
+        state.bladenGemaakt += 1;
+        state.totaalCorrect += goed;
+
+        localStorage.setItem('rekenapp_xp', state.xp);
+        localStorage.setItem('rekenapp_bladen', state.bladenGemaakt);
+        localStorage.setItem('rekenapp_correct', state.totaalCorrect);
+        initStats();
+
+        alert(`Gecontroleerd! Je hebt ${goed} van de ${state.sommenData.length} sommen goed gemaakt. Je verdient +${verdiendeXp} XP!`);
+        
         document.getElementById('btnControleer').style.display = "none";
         document.getElementById('btnNaarScore').style.display = "block";
     }
@@ -408,68 +456,43 @@
 
     function terugNaarHome() { switchView('dashboard'); }
 
-    // --- VISUELE PDF GENERATOR ---
     function genereerPDF() {
         let element = document.createElement('div');
         element.style.padding = "30px";
         element.style.background = "#fff";
-        
-        let header = `<h2>Smarter RekenApp - ${niveauNamen[state.niveau]}</h2><p>Naam: ________________________ Datum: ______________</p><hr style="margin:20px 0; border:1px dashed #ccc;">`;
-        element.innerHTML = header;
+        element.innerHTML = `<h2>RekenApp Werkblad - ${niveauNamen[state.niveau]}</h2><p>Naam: ________________________ Datum: ______________</p><hr style="margin:20px 0;">`;
 
-        let antwoordenLijst = [];
-
+        let antwoorden = [];
         state.selectedCategories.forEach(cat => {
-            let catTitle = document.createElement('h3');
-            catTitle.style.margin = "25px 0 15px 0";
-            catTitle.style.color = "#4318ff";
-            catTitle.innerText = cat.toUpperCase();
-            element.appendChild(catTitle);
-
-            let grid = document.createElement('div');
-            grid.style.display = "grid";
-            grid.style.gridTemplateColumns = "repeat(2, 1fr)";
-            grid.style.gap = "20px";
+            let title = document.createElement('h3');
+            title.style.margin = "20px 0 10px 0";
+            title.style.color = "#4318ff";
+            title.innerText = cat.toUpperCase();
+            element.appendChild(title);
 
             for(let i=0; i<state.sommenPerOefening; i++) {
                 let s = bouwSom(cat);
-                antwoordenLijst.push(s.antwoord);
-
+                antwoorden.push(s.antwoord);
                 let item = document.createElement('div');
                 item.style.border = "1px solid #e0e5f2";
-                item.style.padding = "15px";
-                item.style.borderRadius = "8px";
+                item.style.padding = "10px";
+                item.style.marginBottom = "8px";
                 
                 if(s.cat === 'splitsen') {
-                    // Vervang invulvakje door een lege stip/lijn voor papier
-                    let cleanHTML = s.customHTML.replace('<input type="text" id="SPLITSMARKER">', '___');
-                    item.innerHTML = cleanHTML;
+                    item.innerHTML = s.customHTML.replace('<input type="text" id="SPLITSMARKER">', '___');
                 } else {
-                    item.innerHTML = `${s.customHTML ? s.customHTML : ''}<div><strong>${s.vraag}</strong></div><div style="margin-top:8px;">Antwoord: ....................</div>`;
+                    item.innerHTML = `<div style="display:flex; align-items:center;">${s.customHTML || ''}<div><strong>${s.vraag}</strong><br>Antwoord: ....................</div></div>`;
                 }
-                grid.appendChild(item);
+                element.appendChild(item);
             }
-            element.appendChild(grid);
         });
 
-        // Pagina-einde voor het nakijkblad
-        let antwoordPagina = document.createElement('div');
-        antwoordPagina.style.pageBreakBefore = "always";
-        antwoordPagina.style.padding = "30px";
-        antwoordPagina.innerHTML = `<h2>Antwoordenblad (${niveauNamen[state.niveau]})</h2><hr style="margin:20px 0;"><ol style="padding-left:20px; font-size:16px; line-height:2;">` + 
-            antwoordenLijst.map((a, i) => `<li>Som ${i+1}: <strong>${a}</strong></li>`).join('') + `</ol>`;
-        
-        element.appendChild(antwoordPagina);
+        let ansPage = document.createElement('div');
+        ansPage.style.pageBreakBefore = "always";
+        ansPage.innerHTML = `<h2>Antwoordenblad</h2><hr><ol style="padding:20px;">` + antwoorden.map((a, i) => `<li>Som ${i+1}: <strong>${a}</strong></li>`).join('') + `</ol>`;
+        element.appendChild(ansPage);
 
-        let opt = {
-            margin:       0.2,
-            filename:     'Mijn_Visueel_Rekenblad.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, logging: false },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).save();
+        html2pdf().set({ margin: 0.3, filename: 'rekenblad.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(element).save();
     }
 </script>
 </body>
