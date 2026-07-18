@@ -150,7 +150,7 @@
         <div class="dashboard-grid">
             <div class="tile active" id="tile-splitsen" onclick="toggleTile('splitsen')">
                 <div class="tile-icon">🪵</div>
-                <div><h3>Splitsbomen</h3><p>Hogere getallen & variatie</p></div>
+                <div><h3>Splitsommen</h3><p>Hogere getallen & variatie</p></div>
             </div>
             <div class="tile active" id="tile-tafels" onclick="toggleTile('tafels')">
                 <div class="tile-icon">✖️</div>
@@ -220,7 +220,7 @@
                     </tr>
                 </thead>
                 <tbody id="progressTableBody">
-                    <!-- Volledig synchroon gevuld via JS -->
+                    <!-- Volledig synchroon gevuld via JS met enkel de actieve onderdelen -->
                 </tbody>
             </table>
 
@@ -240,19 +240,14 @@
 </div>
 
 <script>
-    // Systematiek voor data & categorieën mapping
+    // Systematiek voor data & categorieën mapping (Gecorrigeerd naar jouw 6 onderdelen)
     const categorieMapping = {
         tafels: { nr: "1. Tafels (8-19)", code: "tafels" },
-        schatten: { nr: "2. Schatten", code: "schatten" },
-        splitsen: { nr: "3. Splitsommen", code: "splitsen" },
-        breuken: { nr: "4. Breuken Mix", code: "breuken" },
-        breuken_context: { nr: "4b. Breuk in Context", code: "breuken_context" },
-        optellen_aftrekken: { nr: "5. +/- Sommen", code: "optellen_aftrekken" },
-        keersommen: { nr: "6. Keersommen", code: "keersommen" },
-        deelsommen: { nr: "7. Deelsommen", code: "deelsommen" },
-        redactie: { nr: "8. Redactiesommen", code: "redactie" },
-        klokkijken: { nr: "9. Klokkijken", code: "klokkijken" }, // Flexibele toevoeging
-        geld: { nr: "10. Geld tellen", code: "geld" }          // Flexibele toevoeging
+        splitsen: { nr: "2. Splitsommen", code: "splitsen" },
+        optellen_aftrekken: { nr: "3. +/- Sommen", code: "optellen_aftrekken" },
+        klokkijken: { nr: "4. Klokkijken", code: "klokkijken" },
+        geld: { nr: "5. Geld tellen", code: "geld" },
+        redactie: { nr: "6. Redactiesommen", code: "redactie" }
     };
 
     // Standaard object structuur opzetten
@@ -261,7 +256,7 @@
         defaultStats[key] = { t: 0, c: 0 };
     });
 
-    let savedStats = JSON.parse(localStorage.getItem('rekenapp_stats_v3')) || defaultStats;
+    let savedStats = JSON.parse(localStorage.getItem('rekenapp_stats_v4')) || defaultStats;
 
     let state = {
         niveau: 1,
@@ -275,11 +270,10 @@
     const niveauNamen = ["Groep 4 (Begin)", "Groep 4 (Midden)", "Groep 5", "Groep 5 / +"];
     
     const redactiePool = [
-        { v: "Bij de bakker liggen {t} broodjes. Er worden er {w} verkocht. Hoeveel broodjes zijn er over?", f: (t, w) => t - w, r: [[40,60], [10,25]] },
-        { v: "Sam fietst {t} kilometer in de ochtend en {w} kilometer in de middag. Hoeveel fietst hij in totaal?", f: (t, w) => t + w, r: [[15,30], [10,20]] },
-        { v: "Er zitten {t} apen in een grote kooi. De oppasser verdeelt ze eerlijk over {w} binnenhokken. Hoeveel apen per hok?", f: (t, w) => t / w, isDeel: true },
-        { v: "Een kaartje voor de dierentuin kost €{w}. Papa koopt {t} kaartjes. Hoeveel kost dit samen?", f: (t, w) => t * w, r: [[3,6], [6,12]] },
-        { v: "In een plonsbassin zwemmen {t} kikkers. Er springen {w} kikkers weg. Hoeveel kikkers blijven er?", f: (t, w) => t - w, r: [[25,45], [8,18]] }
+        { v: "Bij de bakker liggen {t} broodjes. Er worden er {w} verkocht. Hoeveel broodjes zijn er over?", f: (t, w) => t - w },
+        { v: "Sam fietst {t} kilometer in de ochtend en {w} kilometer in de middag. Hoeveel fietst hij in totaal?", f: (t, w) => t + w },
+        { v: "Een kaartje voor de dierentuin kost €{w}. Papa koopt {t} kaartjes. Hoeveel kost dit samen?", f: (t, w) => t * w },
+        { v: "In een plonsbassin zwemmen {t} kikkers. Er springen {w} kikkers weg. Hoeveel kikkers blijven er?", f: (t, w) => t - w }
     ];
 
     // Inputmasker voor de kloktijden: voegt automatisch een ':' toe na twee getallen
@@ -304,11 +298,8 @@
         const tableBody = document.getElementById('progressTableBody');
         tableBody.innerHTML = '';
 
-        // Definieer de vaste volgorde die gewenst is op het scherm
-        const toonVolgorde = [
-            "tafels", "schatten", "splitsen", "breuken", "breuken_context", 
-            "optellen_aftrekken", "keersommen", "deelsommen", "redactie", "klokkijken", "geld"
-        ];
+        // Enkel de 6 actieve onderdelen tonen in de juiste volgorde
+        const toonVolgorde = ["tafels", "splitsen", "optellen_aftrekken", "klokkijken", "geld", "redactie"];
 
         toonVolgorde.forEach(key => {
             let item = state.stats[key] || { t: 0, c: 0 };
@@ -317,13 +308,11 @@
 
             let perc = item.t > 0 ? Math.round((item.c / item.t) * 100) : 0;
             
-            // Berekenen beste/slechtste onderdelen
             if (item.t > 0) {
-                if (perc > hoogstePerc) { hoogstePerc = perc; besteCat = categorieMapping[key].nr.split('. ')[1]; }
-                if (perc < laagstePerc) { laagstePerc = perc; slechtsteCat = categorieMapping[key].nr.split('. ')[1]; }
+                if (perc >= hoogstePerc) { hoogstePerc = perc; besteCat = categorieMapping[key].nr.split('. ')[1]; }
+                if (perc <= laagstePerc) { laagstePerc = perc; slechtsteCat = categorieMapping[key].nr.split('. ')[1]; }
             }
 
-            // Bepaal de niveau badge tekst
             let badgeHTML = '<span class="badge badge-none">Geen data</span>';
             if (item.t > 0) {
                 if (perc >= 85) badgeHTML = '<span class="badge badge-master">Meesterlijk ✨</span>';
@@ -338,7 +327,6 @@
             tableBody.innerHTML += row;
         });
 
-        // Dashboard waarden invullen
         document.getElementById('statSommenGemaakt').innerText = totaalGemaakt;
         document.getElementById('statTotaalGoed').innerText = totaalGoed;
         document.getElementById('statBesteOnderdeel').innerText = totaalGemaakt > 0 ? `${besteCat} (${hoogstePerc}%)` : "-";
@@ -365,7 +353,7 @@
     }
 
     function resetScoresOnly() {
-        if(confirm("Weet je zeker dat je alle behaalde punten wilt resetten naar 0? (De voortgangspercentages in de tabel blijven bewaard!)")) {
+        if(confirm("Weet je zeker dat je alle behaalde punten wilt resetten naar 0?")) {
             state.punten = 0;
             localStorage.setItem('rekenapp_punten', 0);
             initStats();
@@ -413,7 +401,7 @@
         return html;
     }
 
-    function bouwSom(cat, gebruikteRedactie, uniekeTijden, geldVariatieTeller) {
+    function bouwSom(cat, gebruikteRedactie, uniekeTijden) {
         let vraag = "", antwoord = "", customHTML = "", extraUitleg = "";
         let niv = state.niveau;
 
@@ -437,14 +425,14 @@
 
             case 'tafels':
                 let t = [2,3,4,5,6,7,8,9,10][Math.floor(Math.random() * 9)];
-                let m = Math.floor(Math.random() * 9) + 2; // Geen sommen met 1
+                let m = Math.floor(Math.random() * 9) + 2;
                 vraag = `${m} × ${t} =`;
                 antwoord = (m * t).toString();
                 break;
 
             case 'optellen_aftrekken':
                 let a = Math.floor(Math.random() * 50) + 20;
-                let b = Math.floor(Math.random() * 20) + 2; // Geen 1
+                let b = Math.floor(Math.random() * 20) + 2;
                 vraag = Math.random() > 0.5 ? `${a} + ${b} =` : `${a+b} - ${b} =`;
                 antwoord = Math.random() > 0.5 ? (a+b).toString() : a.toString();
                 break;
@@ -454,9 +442,9 @@
                 let minutenOpties = [0, 30]; // Begin 4: hele & halve uren
 
                 if(niv === 0) {
-                    minutenOpties = [0, 15, 30, 45]; // Midden 4 breidt uit met kwartieren
+                    minutenOpties = [0, 15, 30, 45]; // Groep 4 kwartieren erbij
                 } else if(niv >= 1) {
-                    minutenOpties = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]; // Groep 5 heeft alles
+                    minutenOpties = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]; // Vanaf midden 5 / groep 5 alles
                 }
 
                 do {
@@ -468,7 +456,7 @@
                 uniekeTijden.push(combiKey);
                 customHTML = genereerKlokHTML(h, min);
                 vraag = "Hoe laat is het?";
-                extraUitleg = "Typ 4 cijfers. Voorbeeld: 0830 wordt automatisch 08:30";
+                extraUitleg = "Vul alleen de 4 cijfers in (bijv. 0830)";
                 
                 let hStr = h < 10 ? '0' + h : h.toString();
                 let mStr = min < 10 ? '0' + min : min.toString();
@@ -498,7 +486,7 @@
 
     function genereerWerkblad() {
         state.sommenData = [];
-        let gebruikteRedactie = [], uniekeTijden = [], geldTeller = 0;
+        let gebruikteRedactie = [], uniekeTijden = [];
 
         const container = document.getElementById('worksheetContainer');
         container.innerHTML = `<h2 style="margin-bottom:15px;">Mijn Oefenblad</h2>`;
@@ -508,7 +496,7 @@
             block.innerHTML = `<div class="category-header">${categorieMapping[cat] ? categorieMapping[cat].nr : cat.toUpperCase()}</div>`;
             
             for(let i=0; i<state.sommenPerOefening; i++) {
-                let s = bouwSom(cat, gebruikteRedactie, uniekeTijden, geldTeller);
+                let s = bouwSom(cat, gebruikteRedactie, uniekeTijden);
                 let idx = state.sommenData.length;
                 state.sommenData.push(s);
 
@@ -574,7 +562,7 @@
 
         state.punten += goed;
         localStorage.setItem('rekenapp_punten', state.punten);
-        localStorage.setItem('rekenapp_stats_v3', JSON.stringify(state.stats));
+        localStorage.setItem('rekenapp_stats_v4', JSON.stringify(state.stats));
         initStats();
 
         alert(`Goed gedaan! Je hebt ${goed} sommen goed gemaakt.`);
