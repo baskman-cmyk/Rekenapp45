@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekenen Oefenen - Primary School</title>
+    <title>Rekenen & Redactiesommen</title>
+    <!-- html2pdf.js bibliotheek inladen voor PDF generatie -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --primary: #4a90e2;
@@ -11,6 +13,15 @@
             --danger: #e74c3c;
             --background: #f5f7fa;
             --text: #2c3e50;
+            
+            /* Subtiele themakleuren voor de verschillende sommen */
+            --bg-som: #eef5fc;      /* Zacht blauw */
+            --bg-klok: #fff9e6;     /* Zacht geel */
+            --bg-geld: #e8f8f0;     /* Zacht groen */
+            --bg-tijd: #f6efff;     /* Zacht paars */
+            --bg-meten: #fef0f5;    /* Zacht roze */
+            --bg-breuken: #e6f7ff;  /* Zacht cyaan */
+            --bg-stappen: #fff2e6;  /* Zacht oranje */
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -56,8 +67,14 @@
             cursor: pointer;
             font-weight: bold;
             transition: background 0.2s;
+            margin-bottom: 10px;
         }
         button:hover { background-color: #357abd; }
+        .btn-secondary { background-color: #7f8c8d; }
+        .btn-secondary:hover { background-color: #616a6b; }
+        .btn-pdf { background-color: #e67e22; }
+        .btn-pdf:hover { background-color: #d35400; }
+        
         .progress-bar {
             height: 10px;
             background-color: #ecf0f1;
@@ -66,20 +83,32 @@
             overflow: hidden;
         }
         .progress-fill { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.3s; }
+        
+        /* De dynamische vraagkaart */
         .question-card {
-            background: #f8f9fa;
             padding: 25px;
             border-radius: 8px;
-            border-left: 5px solid var(--primary);
             margin-bottom: 20px;
             font-size: 20px;
             text-align: center;
             line-height: 1.5;
+            transition: background-color 0.3s ease;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
         }
+        .question-header {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #7f8c8d;
+        }
+        
         #clockCanvas { display: block; margin: 20px auto; background: white; border-radius: 50%; }
         .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .answer-btn { background-color: #fff; color: var(--text); border: 2px solid #bdc3c7; padding: 15px; font-size: 18px;}
         .answer-btn:hover { background-color: #f0f3f4; }
+        
         .fraction {
             display: inline-flex;
             flex-direction: column;
@@ -90,6 +119,12 @@
         }
         .fraction .num { border-bottom: 2px solid var(--text); padding-bottom: 2px; }
         .fraction .den { padding-top: 2px; }
+
+        /* PDF Styling (onzichtbaar op het scherm) */
+        #pdf-template { display: none; font-family: Arial, sans-serif; padding: 40px; }
+        .pdf-item { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px dotted #ccc; }
+        .pdf-q { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+        .pdf-a { color: #2ecc71; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -129,7 +164,10 @@
     <!-- QUIZ INTERFACE -->
     <div id="quiz" class="quiz-section">
         <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
-        <div id="question" class="question-card">Laadt vraag...</div>
+        <div id="question" class="question-card">
+            <div id="q-header" class="question-header">LADEN...</div>
+            <div id="q-body">Laadt vraag...</div>
+        </div>
         <canvas id="clockCanvas" width="200" height="200" style="display:none;"></canvas>
         <div id="answers" class="answers-grid"></div>
     </div>
@@ -138,21 +176,29 @@
     <div id="results" class="result-section">
         <h2>Resultaat 🎉</h2>
         <p id="scoreText" style="font-size: 22px; text-align: center; margin: 20px 0;"></p>
-        <button onclick="restartQuiz()" style="width: 100%;">Nog een keer oefenen 🔄</button>
+        <button onclick="generatePDF()" class="btn-pdf" style="width: 100%;">📄 Download Werkblad als PDF</button>
+        <button onclick="restartQuiz()" class="btn-secondary" style="width: 100%;">Nog een keer oefenen 🔄</button>
     </div>
+</div>
+
+<!-- Verborgen HTML structuur speciaal om de PDF netjes op te bouwen -->
+<div id="pdf-template">
+    <h1 style="color: #2c3e50; text-align: left; margin-bottom: 5px;">Mijn Rekenwerkblad</h1>
+    <p id="pdf-meta" style="color: #7f8c8d; margin-top: 0; margin-bottom: 30px; border-bottom: 2px solid #2c3e50; padding-bottom: 10px;"></p>
+    <div id="pdf-questions-container"></div>
 </div>
 
 <script>
 let state = {
     level: 4, totalQuestions: 10, currentIdx: 0, score: 0,
-    allowedTypes: [], questionsList: [], currentQuestion: null
+    allowedTypes: [], questionsList: [], currentQuestion: null,
+    history: [] // Slaat gemaakte vragen op voor het PDF rapport
 };
 
 const DATA = {
     names: ['Lisa', 'Tom', 'Daan', 'Sophie', 'Luuk', 'Emma', 'Milan', 'Julia', 'Sem', 'Tess', 'Lars', 'Zoë', 'Sara', 'Eva', 'Mila'],
     items: ['appels', 'bananen', 'voetbalplaatjes', 'potloden', 'knikkers', 'koekjes', 'snoepjes', 'boeken', 'speelgoedauto\'s', 'artikelen', 'broodjes', 'eieren'],
-    stores: ['supermarkt', 'bakker', 'speelgoedwinkel', 'groenteboer', 'winkel', 'bioscoop'],
-    vehicles: ['trein', 'bus', 'fiets']
+    stores: ['supermarkt', 'bakker', 'speelgoedwinkel', 'groenteboer', 'winkel', 'bioscoop']
 };
 
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
@@ -164,6 +210,7 @@ function startQuiz() {
     state.currentIdx = 0;
     state.score = 0;
     state.allowedTypes = [];
+    state.history = [];
     
     if(document.getElementById('chk-sommen').checked) state.allowedTypes.push('som');
     if(document.getElementById('chk-klok').checked) state.allowedTypes.push('klok');
@@ -199,7 +246,7 @@ function generateQuestionData(type, lv) {
             else if(op === '+') { a = rand(100, 900); b = rand(100, 800); ans = a + b; text = `${a} + ${b} = ...`; }
             else { a = rand(500, 1000); b = rand(100, 400); ans = a - b; text = `${a} - ${b} = ...`; }
         }
-        return { text, answer: String(ans), options: genOptions(ans) };
+        return { text, answer: String(ans), options: genOptions(ans), category: 'KALE SOMMEN', theme: 'som' };
     }
 
     if (type === 'klok') {
@@ -220,175 +267,168 @@ function generateQuestionData(type, lv) {
             let t = m===0 ? `${h} uur` : (m===30 ? `half ${h===12?1:h+1}` : `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} uur`);
             if(!opts.includes(t)) opts.push(t);
         }
-        return { text: "Hoe laat is het op deze klok?", answer: normalText, options: opts.sort(() => Math.random()-0.5), isClock: true, hr, mn };
+        return { text: "Hoe laat is het op deze klok?", answer: normalText, options: opts.sort(() => Math.random()-0.5), isClock: true, hr, mn, category: '⏱️ KLOKKIJKEN', theme: 'klok' };
     }
 
     if (type === 'redactie') {
-        // Gewogen verdeling op basis van jouw input
         let dice = rand(1, 100);
-        let theme = 'geld'; // default
-        if (dice <= 20) theme = 'geld';            // 20%
-        else if (dice <= 35) theme = 'tijd';        // 15%
-        else if (dice <= 50) theme = 'meten';       // 15%
-        else if (dice <= 70) theme = 'keer_delen';  // 20%
-        else if (dice <= 80) theme = 'breuken';     // 10%
-        else theme = 'stappen';                     // 20%
+        let theme = 'geld'; 
+        if (dice <= 20) theme = 'geld';            
+        else if (dice <= 35) theme = 'tijd';        
+        else if (dice <= 50) theme = 'meten';       
+        else if (dice <= 70) theme = 'keer_delen';  
+        else if (dice <= 80) theme = 'breuken';     
+        else theme = 'stappen';                     
 
         let name1 = pick(DATA.names), name2 = pick(DATA.names);
         while(name1 === name2) name2 = pick(DATA.names);
         let item = pick(DATA.items), store = pick(DATA.stores);
 
-        // --- GELD THEMA (20%) ---
         if (theme === 'geld') {
             if (lv == 4) {
                 let r = rand(1, 3);
-                if (r === 1) { // Boek / Teruggeven
+                if (r === 1) {
                     let cost = rand(5, 9), pay = 10, ans = pay - cost;
-                    return { text: `Een boek kost €${cost}. Je betaalt met een briefje van €${pay}. Hoeveel geld krijg je terug?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`) };
-                } else if (r === 2) { // Spaargeld erbij
+                    return { text: `Een boek kost €${cost}. Je betaalt met een briefje van €${pay}. Hoeveel geld krijg je terug?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`), category: '💰 GELD', theme: 'geld' };
+                } else if (r === 2) {
                     let spaar = rand(10, 25), erbij = rand(5, 15), ans = spaar + erbij;
-                    return { text: `${name1} heeft €${spaar} spaargeld. Ze krijgt €${erbij} erbij. Hoeveel euro heeft ${name1} nu?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`) };
-                } else { // Ijsjes kopen
+                    return { text: `${name1} heeft €${spaar} spaargeld. Ze krijgt €${erbij} erbij. Hoeveel euro heeft ${name1} nu?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`), category: '💰 GELD', theme: 'geld' };
+                } else {
                     let cost = rand(2, 4), qty = rand(2, 4), ans = cost * qty;
-                    return { text: `Een ijsje kost €${cost}. ${name1} koopt ${qty} ijsjes. Hoeveel betaalt hij?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`) };
+                    return { text: `Een ijsje kost €${cost}. ${name1} koopt ${qty} ijsjes. Hoeveel betaalt hij?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`), category: '💰 GELD', theme: 'geld' };
                 }
-            } else { // Groep 5 Geld
+            } else {
                 let r = rand(1, 3);
-                if (r === 1) { // Korting groter bedrag
+                if (r === 1) {
                     let cost = rand(40, 95), korting = rand(5, 15), ans = cost - korting;
-                    return { text: `Aankoop: Een rugzak kost normaal €${cost}. Vandaag krijg je €${korting} korting. Hoeveel kost de rugzak nu?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`) };
-                } else if (r === 2) { // Briefje van 50 of 100
+                    return { text: `Een rugzak kost normaal €${cost}. Vandaag krijg je €${korting} korting. Hoeveel kost de rugzak nu?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`), category: '💰 GELD', theme: 'geld' };
+                } else if (r === 2) {
                     let cost = rand(55, 85), pay = 100, ans = pay - cost;
-                    return { text: `Een jas kost €${cost}. Je betaalt met een briefje van €${pay}. Hoeveel geld krijg je terug?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`) };
-                } else { // Multiplicatie boeken/items
+                    return { text: `Een jas kost €${cost}. Je betaalt met een briefje van €${pay}. Hoeveel geld krijg je terug?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`), category: '💰 GELD', theme: 'geld' };
+                } else {
                     let qty = rand(3, 5), cost = rand(12, 22), ans = qty * cost;
-                    return { text: `De ${store} verkoopt ${qty} boeken van €${cost} per stuk. Hoeveel kosten de boeken samen?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`) };
+                    return { text: `De ${store} verkoopt ${qty} boeken van €${cost} per stuk. Hoeveel kosten de boeken samen?`, answer: `€${ans}`, options: genOptions(ans).map(o => `€${o}`), category: '💰 GELD', theme: 'geld' };
                 }
             }
         }
 
-        // --- TIJD THEMA (15%) ---
         if (theme === 'tijd') {
             if (lv == 4) {
                 let r = rand(1, 3);
-                if (r === 1) { // Schoolles
+                if (r === 1) {
                     let les = rand(1, 2);
-                    return { text: `De school begint om 08:30 uur. De les duurt ${les} uur. Hoe laat is de les afgelopen?`, answer: `${8+les}:30 uur`, options: [`${8+les}:30 uur`, `${9+les}:30 uur`, `${7+les}:30 uur`, `${8+les}:00 uur`].sort(() => Math.random()-0.5) };
-                } else if (r === 2) { // Training half uur
+                    return { text: `De school begint om 08:30 uur. De les duurt ${les} uur. Hoe laat is de les afgelopen?`, answer: `${8+les}:30 uur`, options: [`${8+les}:30 uur`, `${9+les}:30 uur`, `${7+les}:30 uur`, `${8+les}:00 uur`].sort(() => Math.random()-0.5), category: '⏳ TIJD & REDACTIE', theme: 'tijd' };
+                } else if (r === 2) {
                     let hr = rand(13, 16);
-                    return { text: `Het is ${hr}:00 uur. Over een half uur begint de training. Hoe laat begint de training?`, answer: `${hr}:30 uur`, options: [`${hr}:30 uur`, `${hr+1}:30 uur`, `${hr}:45 uur`, `${hr}:15 uur`].sort(() => Math.random()-0.5) };
-                } else { // Kwart over naar digitaal
+                    return { text: `Het is ${hr}:00 uur. Over een half uur begint de training. Hoe laat begint de training?`, answer: `${hr}:30 uur`, options: [`${hr}:30 uur`, `${hr+1}:30 uur`, `${hr}:45 uur`, `${hr}:15 uur`].sort(() => Math.random()-0.5), category: '⏳ TIJD & REDACTIE', theme: 'tijd' };
+                } else {
                     let hr = rand(2, 6);
-                    return { text: `De klok wijst kwart over ${hr} aan. Hoe laat is dat digitaal?`, answer: `0${hr}:15`, options: [`0${hr}:15`, `0${hr}:45`, `0${hr}:30`, `0${hr+1}:15`].sort(() => Math.random()-0.5) };
+                    return { text: `De klok wijst kwart over ${hr} aan. Hoe laat is dat digitaal?`, answer: `0${hr}:15`, options: [`0${hr}:15`, `0${hr}:45`, `0${hr}:30`, `0${hr+1}:15`].sort(() => Math.random()-0.5), category: '⏳ TIJD & REDACTIE', theme: 'tijd' };
                 }
-            } else { // Groep 5 Tijd
+            } else {
                 let r = rand(1, 2);
-                if (r === 1) { // Treinreis duur berekenen
-                    let startH = rand(8, 10), startM = 45; // bijv 9:45
-                    let duurMins = rand(70, 95); // bijv 95 mins = 1u35 -> 11:20
+                if (r === 1) {
+                    let startH = rand(8, 10), startM = 45;
+                    let duurMins = rand(70, 95);
                     let endH = startH + Math.floor((startM + duurMins)/60);
                     let endM = (startM + duurMins) % 60;
                     let ansStr = `${Math.floor(duurMins/60)} uur en ${duurMins%60} minuten`;
-                    return { text: `Een trein vertrekt om 0${startH}:${startM} uur en komt aan om ${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')} uur. Hoe lang duurt de reis?`, answer: ansStr, options: [ansStr, `${Math.floor(duurMins/60)} uur`, `2 uur en 10 minuten`, `1 uur en 15 minuten`].sort(() => Math.random()-0.5) };
-                } else { // Sportwedstrijd eindtijd
+                    return { text: `Een trein vertrekt om 0${startH}:${startM} uur en komt aan om ${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')} uur. Hoe lang duurt de reis?`, answer: ansStr, options: [ansStr, `${Math.floor(duurMins/60)} uur`, `2 uur en 10 minuten`, `1 uur en 15 minuten`].sort(() => Math.random()-0.5), category: '⏳ TIJD & REDACTIE', theme: 'tijd' };
+                } else {
                     let startH = rand(13, 15), startM = 35;
-                    let addH = 1, addM = 45; // 1u45m
+                    let addH = 1, addM = 45;
                     let endH = startH + addH + Math.floor((startM + addM)/60);
                     let endM = (startM + addM) % 60;
                     let ansStr = `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')} uur`;
-                    return { text: `Een sportwedstrijd begint om ${startH}:${startM} uur en duurt 1 uur en 45 minuten. Hoe laat is de wedstrijd afgelopen?`, answer: ansStr, options: [ansStr, `${endH-1}:${endM} uur`, `${endH}:${(endM+15)%60} uur`, `${endH+1}:00 uur`].sort(() => Math.random()-0.5) };
+                    return { text: `Een sportwedstrijd begint om ${startH}:${startM} uur en duurt 1 uur en 45 minuten. Hoe laat is de wedstrijd afgelopen?`, answer: ansStr, options: [ansStr, `${endH-1}:${endM} uur`, `${endH}:${(endM+15)%60} uur`, `${endH+1}:00 uur`].sort(() => Math.random()-0.5), category: '⏳ TIJD & REDACTIE', theme: 'tijd' };
                 }
             }
         }
 
-        // --- METEN THEMA (15%) ---
         if (theme === 'meten') {
-            if (lv == 4) { // Groep 4 lichtere meting (minder cm)
+            if (lv == 4) {
                 let lint = rand(2, 4), afknip = rand(40, 70), ans = (lint*100) - afknip;
-                return { text: `Een lint is ${lint} meter lang. Je knipt er ${afknip} centimeter af. Hoeveel centimeter lint blijft over?`, answer: `${ans} cm`, options: genOptions(ans).map(o => `${o} cm`) };
-            } else { // Groep 5 Meten (Conversies & gewicht)
+                return { text: `Een lint is ${lint} meter lang. Je knipt er ${afknip} centimeter af. Hoeveel centimeter lint blijft over?`, answer: `${ans} cm`, options: genOptions(ans).map(o => `${o} cm`), category: '⚖️ METEN', theme: 'meten' };
+            } else {
                 let r = rand(1, 4);
-                if (r === 1) { // Meter naar cm
+                if (r === 1) {
                     let m = rand(8, 15), ans = m * 100;
-                    return { text: `Hoeveel centimeter is ${m} meter?`, answer: `${ans} cm`, options: genOptions(ans).map(o => `${o} cm`) };
-                } else if (r === 2) { // Wandelroute km + m
+                    return { text: `Hoeveel centimeter is ${m} meter?`, answer: `${ans} cm`, options: genOptions(ans).map(o => `${o} cm`), category: '⚖️ METEN', theme: 'meten' };
+                } else if (r === 2) {
                     let km = rand(2, 5), m = pick([200, 500, 800]), ans = (km*1000) + m;
-                    return { text: `Een wandelroute is ${km} kilometer en ${m} meter lang. Hoeveel meter is dat?`, answer: `${ans} meter`, options: genOptions(ans).map(o => `${o} meter`) };
-                } else if (r === 3) { // Kilo naar gram
+                    return { text: `Een wandelroute is ${km} kilometer & ${m} meter lang. Hoeveel meter is dat?`, answer: `${ans} meter`, options: genOptions(ans).map(o => `${o} meter`), category: '⚖️ METEN', theme: 'meten' };
+                } else if (r === 3) {
                     let kg = rand(3, 8), ans = kg * 1000;
-                    return { text: `Een zak aardappels weegt ${kg} kilogram. Hoeveel gram is dat?`, answer: `${ans} gram`, options: genOptions(ans).map(o => `${o} gram`) };
-                } else { // Vloeistof ml over
+                    return { text: `Een zak aardappels weegt ${kg} kilogram. Hoeveel gram is dat?`, answer: `${ans} gram`, options: genOptions(ans).map(o => `${o} gram`), category: '⚖️ METEN', theme: 'meten' };
+                } else {
                     let fles = 1000, drink = rand(300, 600), ans = fles - drink;
-                    return { text: `${name1} heeft een fles van 1 liter water. Ze drinkt ${drink} ml op. Hoeveel ml blijft er over?`, answer: `${ans} ml`, options: genOptions(ans).map(o => `${o} ml`) };
+                    return { text: `${name1} heeft een fles van 1 liter water. Ze drinkt ${drink} ml op. Hoeveel ml blijft er over?`, answer: `${ans} ml`, options: genOptions(ans).map(o => `${o} ml`), category: '⚖️ METEN', theme: 'meten' };
                 }
             }
         }
 
-        // --- KEER / DELEN THEMA (20%) ---
         if (theme === 'keer_delen') {
             if (lv == 4) {
                 let r = rand(1, 2);
-                if (r === 1) { // Rijen met potloden
+                if (r === 1) {
                     let rijen = rand(4, 6), stuks = rand(4, 8), ans = rijen * stuks;
-                    return { text: `Een doos heeft ${rijen} rijen met ${stuks} potloden. Hoeveel potloden zitten er in totaal in de doos?`, answer: `${ans} potloden`, options: genOptions(ans).map(o => `${o} potloden`) };
-                } else { // Koekjes verdelen
+                    return { text: `Een doos heeft ${rijen} rijen met ${stuks} potloden. Hoeveel potloden zitten er in totaal in de doos?`, answer: `${ans} potloden`, options: genOptions(ans).map(o => `${o} potloden`), category: '✖️ VERMENIGVULDIGEN & DELEN', theme: 'keer_delen' };
+                } else {
                     let kids = rand(4, 6), perKind = rand(4, 6), totaal = kids * perKind;
-                    return { text: `${totaal} koekjes worden eerlijk verdeeld over ${kids} kinderen. Hoeveel koekjes krijgt ieder kind?`, answer: `${perKind} koekjes`, options: genOptions(perKind).map(o => `${o} koekjes`) };
+                    return { text: `${totaal} koekjes worden eerlijk verdeeld over ${kids} kinderen. Hoeveel koekjes krijgt ieder kind?`, answer: `${perKind} koekjes`, options: genOptions(perKind).map(o => `${o} koekjes`), category: '✖️ VERMENIGVULDIGEN & DELEN', theme: 'keer_delen' };
                 }
-            } else { // Groep 5 Keer/Delen (Grotere getallen)
+            } else {
                 let r = rand(1, 3);
-                if (r === 1) { // Dozen met potloden
+                if (r === 1) {
                     let dozen = rand(6, 9), stuks = pick([20, 25, 30]), ans = dozen * stuks;
-                    return { text: `Een school koopt ${dozen} dozen met ${stuks} potloden. Hoeveel potloden zijn dat samen?`, answer: `${ans} potloden`, options: genOptions(ans).map(o => `${o} potloden`) };
-                } else if (r === 2) { // Eieren verdelen
+                    return { text: `Een school koopt ${dozen} dozen met ${stuks} potloden. Hoeveel potloden zijn dat samen?`, answer: `${ans} potloden`, options: genOptions(ans).map(o => `${o} potloden`), category: '✖️ VERMENIGVULDIGEN & DELEN', theme: 'keer_delen' };
+                } else if (r === 2) {
                     let dozen = pick([10, 12, 20]), perDoos = rand(15, 20), totaal = dozen * perDoos;
-                    return { text: `Een boer verdeelt ${totaal} eieren over ${dozen} dozen. Hoeveel eieren zitten in elke doos?`, answer: `${perDoos} eieren`, options: genOptions(perDoos).map(o => `${o} eieren`) };
-                } else { // Rij & Stoelen (Bioscoop)
+                    return { text: `Een boer verdeelt ${totaal} eieren over ${dozen} dozen. Hoeveel eieren zitten in elke doos?`, answer: `${perDoos} eieren`, options: genOptions(perDoos).map(o => `${o} eieren`), category: '✖️ VERMENIGVULDIGEN & DELEN', theme: 'keer_delen' };
+                } else {
                     let rijen = rand(12, 16), stoelen = rand(12, 18), ans = rijen * stoelen;
-                    return { text: `Een ${store} heeft ${rijen} rijen met ${stoelen} stoelen. Hoeveel stoelen zijn er in totaal?`, answer: `${ans} stoelen`, options: genOptions(ans).map(o => `${o} stoelen`) };
+                    return { text: `Een bioscoop heeft ${rijen} rijen met ${stoelen} stoelen. Hoeveel stoelen zijn er in totaal?`, answer: `${ans} stoelen`, options: genOptions(ans).map(o => `${o} stoelen`), category: '✖️ VERMENIGVULDIGEN & DELEN', theme: 'keer_delen' };
                 }
             }
         }
 
-        // --- BREUKEN THEMA (10%) ---
         if (theme === 'breuken') {
-            if (lv == 4) { // Groep 4 basisconcept (helften/kwarten impliciet)
+            if (lv == 4) {
                 let totaal = pick([12, 16, 20]), ans = totaal / 2;
-                return { text: `Er liggen ${totaal} snoepjes. De helft is voor ${name1}. Hoeveel krijgt ${name1}?`, answer: `${ans} snoepjes`, options: genOptions(ans).map(o => `${o} snoepjes`) };
-            } else { // Groep 5 Breuken
+                return { text: `Er liggen ${totaal} snoepjes. De helft is voor ${name1}. Hoeveel krijgt ${name1}?`, answer: `${ans} snoepjes`, options: genOptions(ans).map(o => `${o} snoepjes`), category: '🍕 BREUKEN', theme: 'breuken' };
+            } else {
                 let r = rand(1, 3);
-                if (r === 1) { // Pizza stukken
+                if (r === 1) {
                     let totaal = 8, gegeten = rand(3, 5), over = totaal - gegeten;
                     let breukLabel = `<div class="fraction"><span class="num">${gegeten}</span><span class="den">${totaal}</span></div>`;
                     let wrongLabel = `<div class="fraction"><span class="num">${over}</span><span class="den">${totaal}</span></div>`;
-                    return { text: `Een pizza is verdeeld in ${totaal} gelijke stukken. ${name1} eet ${gegeten} stukken op. Welk deel van de pizza heeft ze gegeten?`, answer: breukLabel, options: [breukLabel, wrongLabel, `<div class="fraction"><span class="num">1</span><span class="den">2</span></div>`, `<div class="fraction"><span class="num">1</span><span class="den">4</span></div>`], isHtml: true };
-                } else if (r === 2) { // Kwart van de klas
+                    return { text: `Een pizza is verdeeld in ${totaal} gelijke stukken. ${name1} eet ${gegeten} stukken op. Welk deel is gegeten?`, answer: breukLabel, options: [breukLabel, wrongLabel, `<div class="fraction"><span class="num">1</span><span class="den">2</span></div>`, `<div class="fraction"><span class="num">1</span><span class="den">4</span></div>`], isHtml: true, category: '🍕 BREUKEN', theme: 'breuken' };
+                } else if (r === 2) {
                     let kids = pick([20, 24, 28, 32]), ans = kids / 4;
-                    return { text: `Een klas heeft ${kids} kinderen. Een kwart (1/4 deel) van de kinderen draagt een bril. Hoeveel kinderen zijn dat?`, answer: `${ans} kinderen`, options: genOptions(ans).map(o => `${o} kinderen`) };
-                } else { // Route omgekeerd (Uitdaging)
-                    let deel = 2, van = 5, km = 8; // 2/5 = 8km dus 1/5 = 4km -> 5/5 = 20km
+                    return { text: `Een klas heeft ${kids} kinderen. Een kwart (1/4) van de kinderen draagt een bril. Hoeveel kinderen zijn dat?`, answer: `${ans} kinderen`, options: genOptions(ans).map(o => `${o} kinderen`), category: '🍕 BREUKEN', theme: 'breuken' };
+                } else {
+                    let deel = 2, van = 5, km = 8;
                     let ans = (km / deel) * van;
-                    return { text: `Een afgelegde afstand is <div class="fraction"><span class="num">${deel}</span><span class="den">${van}</span></div> deel van de route. Dit is ${km} kilometer. Hoe lang is de hele route?`, answer: `${ans} km`, options: genOptions(ans).map(o => `${o} km`), isHtml: true };
+                    return { text: `Een afstand is <div class="fraction"><span class="num">${deel}</span><span class="den">${van}</span></div> deel van de route. Dit is ${km} kilometer. Hoe lang is de hele route?`, answer: `${ans} km`, options: genOptions(ans).map(o => `${o} km`), isHtml: true, category: '🍕 BREUKEN', theme: 'breuken' };
                 }
             }
         }
 
-        // --- MEERDERE STAPPEN THEMA (20%) ---
         if (theme === 'stappen') {
-            if (lv == 4) { // Eenvoudige optelsom en dan aftrekken
+            if (lv == 4) {
                 let start = rand(40, 60), uitstap = rand(15, 25), instap = rand(5, 12);
                 let ans = start - uitstap + instap;
-                return { text: `In een bus zitten ${start} mensen. Bij de halte stappen er ${uitstap} uit en ${instap} in. Hoeveel mensen zitten er nu nog in de bus?`, answer: `${ans} mensen`, options: genOptions(ans).map(o => `${o} mensen`) };
-            } else { // Groep 5 Uitdagingen (Meerdere stappen)
+                return { text: `In een bus zitten ${start} mensen. Er stappen ${uitstap} mensen uit en ${instap} in. Hoeveel mensen blijven over?`, answer: `${ans} mensen`, options: genOptions(ans).map(o => `${o} mensen`), category: '🔗 MEERDERE STAPPEN', theme: 'stappen' };
+            } else {
                 let r = rand(1, 2);
-                if (r === 1) { // Dozen kopen en verkopen
+                if (r === 1) {
                     let dozen = rand(5, 8), stuks = rand(30, 50), verkocht = rand(25, 45);
                     let ans = (dozen * stuks) - verkocht;
-                    return { text: `Een winkel krijgt ${dozen} dozen met ${stuks} artikelen binnen. Dezelfde middag worden er ${verkocht} artikelen verkocht. Hoeveel artikelen blijven er over?`, answer: String(ans), options: genOptions(ans) };
-                } else { // Tank leeglopen over dagen
+                    return { text: `Een winkel heeft ${dozen} dozen met ${stuks} artikelen. Er worden 35 artikelen verkocht. Hoeveel artikelen blijven over?`, answer: String(ans), options: genOptions(ans), category: '🔗 MEERDERE STAPPEN', theme: 'stappen' };
+                } else {
                     let tank = pick([100, 120, 150]), verbruik = 15;
                     let ans = tank / verbruik;
-                    return { text: `Een grote watertank bevat ${tank} liter water. Elke dag wordt er exact ${verbruik} liter gebruikt. Na hoeveel dagen is de tank helemaal leeg?`, answer: `${ans} dagen`, options: genOptions(ans).map(o => `${o} dagen`) };
+                    return { text: `Een tank bevat ${tank} liter water. Elke dag wordt 15 liter gebruikt. Na hoeveel dagen is de tank leeg?`, answer: `${ans} dagen`, options: genOptions(ans).map(o => `${o} dagen`), category: '🔗 MEERDERE STAPPEN', theme: 'stappen' };
                 }
             }
         }
@@ -414,16 +454,13 @@ function drawClock(hr, mn) {
     ctx.translate(r, r);
     r = r * 0.9;
     
-    // Achtergrond klok
     ctx.beginPath(); ctx.arc(0, 0, r, 0, 2*Math.PI);
     ctx.fillStyle = 'white'; ctx.fill();
     ctx.strokeStyle = '#2c3e50'; ctx.lineWidth = 4; ctx.stroke();
     
-    // Centrum punt
     ctx.beginPath(); ctx.arc(0, 0, 5, 0, 2*Math.PI);
     ctx.fillStyle = '#2c3e50'; ctx.fill();
 
-    // 60 Minutenstreepjes
     for(let i = 0; i < 60; i++) {
         let angle = (i * Math.PI) / 30;
         ctx.rotate(angle);
@@ -438,7 +475,6 @@ function drawClock(hr, mn) {
         ctx.stroke(); ctx.rotate(-angle);
     }
 
-    // Uren getallen
     ctx.font = "bold 14px Segoe UI";
     ctx.textBaseline = "middle"; ctx.textAlign = "center";
     ctx.fillStyle = '#2c3e50';
@@ -449,10 +485,9 @@ function drawClock(hr, mn) {
         ctx.rotate(ang); ctx.translate(0, r - 25); ctx.rotate(-ang);
     }
 
-    // Wijzers plaatsen
     let hourPos = (hr % 12) * 5 + (mn / 12);
-    drawHand(ctx, hourPos * Math.PI / 30, r * 0.5, 5, '#2c3e50'); // Uren
-    drawHand(ctx, mn * Math.PI / 30, r * 0.75, 3, '#e74c3c'); // Minuten
+    drawHand(ctx, hourPos * Math.PI / 30, r * 0.5, 5, '#2c3e50'); 
+    drawHand(ctx, mn * Math.PI / 30, r * 0.75, 3, '#e74c3c'); 
 
     ctx.translate(-canvas.width/2, -canvas.width/2);
 }
@@ -468,7 +503,13 @@ function renderQuestion() {
     state.currentQuestion = q;
 
     document.getElementById('progress').style.width = `${(state.currentIdx / state.totalQuestions) * 100}%`;
-    document.getElementById('question').innerHTML = q.text;
+    
+    // Header invullen en achtergrondkleur dynamisch wijzigen per thema
+    const card = document.getElementById('question');
+    document.getElementById('q-header').textContent = q.category;
+    document.getElementById('q-body').innerHTML = q.text;
+    card.style.backgroundColor = `var(--bg-${q.theme})`;
+    card.style.borderLeft = `5px solid var(--primary)`;
 
     const canvas = document.getElementById('clockCanvas');
     if(q.isClock) {
@@ -484,16 +525,25 @@ function renderQuestion() {
     q.options.forEach(opt => {
         let btn = document.createElement('button');
         btn.className = 'answer-btn';
-        btn.innerHTML = opt; // Altijd innerHTML gebruiken voor breukenweergave
+        btn.innerHTML = opt; 
         btn.onclick = () => checkAnswer(opt);
         answersDiv.appendChild(btn);
     });
 }
 
 function checkAnswer(selected) {
-    if(selected === state.currentQuestion.answer) {
-        state.score++;
-    }
+    let isCorrect = (selected === state.currentQuestion.answer);
+    if(isCorrect) state.score++;
+    
+    // Opslaan in geschiedenis voor het PDF werkblad
+    state.history.push({
+        category: state.currentQuestion.category,
+        text: state.currentQuestion.text,
+        userAnswer: selected,
+        correctAnswer: state.currentQuestion.answer,
+        isCorrect: isCorrect
+    });
+
     state.currentIdx++;
     if(state.currentIdx < state.totalQuestions) {
         renderQuestion();
@@ -506,6 +556,43 @@ function showResults() {
     document.getElementById('quiz').classList.remove('active');
     document.getElementById('results').classList.add('active');
     document.getElementById('scoreText').textContent = `Je hebt ${state.score} van de ${state.totalQuestions} vragen goed beantwoord!`;
+}
+
+function generatePDF() {
+    const container = document.getElementById('pdf-questions-container');
+    container.innerHTML = ''; // Schoonmaken
+    
+    document.getElementById('pdf-meta').textContent = `Niveau: Groep ${state.level} | Score: ${state.score}/${state.totalQuestions} goed beantwoord | Datum: ${new Date().toLocaleDateString('nl-NL')}`;
+
+    state.history.forEach((item, index) => {
+        let div = document.createElement('div');
+        div.className = 'pdf-item';
+        
+        // Zorg dat HTML elementen zoals breuken in de PDF ook netjes renderen
+        div.innerHTML = `
+            <div class="pdf-q">${index + 1}. [${item.category}] ${item.text}</div>
+            <div class="pdf-a">
+                Jouw antwoord: ${item.userAnswer} ${item.isCorrect ? '✅' : '❌ (Goed antwoord: ' + item.correctAnswer + ')'}
+            </div>
+        `;
+        container.appendChild(div);
+    });
+
+    // html2pdf instellingen configureren
+    const element = document.getElementById('pdf-template');
+    element.style.display = 'block'; // Tijdelijk tonen voor de scan
+    
+    const opt = {
+        margin:       10,
+        filename:     `Rekenwerkblad_Groep_${state.level}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        element.style.display = 'none'; // Na opslaan weer verbergen
+    });
 }
 
 function restartQuiz() {
