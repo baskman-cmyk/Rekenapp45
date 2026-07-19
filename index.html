@@ -3,159 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smarter RekenApp Pro v6</title>
-    <!-- html2pdf bibliotheek inladen -->
+    <title>Smarter RekenApp Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root {
-            --bg-main: #f4f7fe;
-            --bg-card: #ffffff;
-            --text-main: #1b2559;
-            --text-muted: #a3aed0;
-            --primary: #4318ff;
-            --primary-light: #f4f2ff;
-            --success: #05cd99;
-            --danger: #ee5d50;
-            --border: #e0e5f2;
-            --radius-lg: 20px;
-            --radius-md: 12px;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; }
-        .app-window { width: 100%; max-width: 768px; display: flex; flex-direction: column; padding-bottom: 40px; }
-        
-        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; background: var(--bg-card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
-        .btn-home { background: var(--primary-light); color: var(--primary); border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
-        .score-container { display: flex; align-items: center; gap: 12px; }
-        .score-badge { background: #fff3e0; color: #ff9800; padding: 8px 14px; border-radius: 20px; font-weight: 700; }
-        
-        .btn-reset { background-color: #fff5f5; border: 1px solid #fca5a5; padding: 8px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #dc2626; transition: background 0.2s; }
-        
-        .view { display: none; flex-direction: column; padding: 24px; }
-        .view.active { display: flex; }
-        .section-title { font-size: 20px; font-weight: 800; margin: 20px 0 10px 0; }
-
-        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 20px; }
-        .tile { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; display: flex; align-items: center; gap: 14px; height: 90px; cursor: pointer; }
-        .tile.active { border-color: var(--primary); background-color: #f9f8ff; }
-        .tile-icon { font-size: 24px; width: 44px; height: 44px; background: var(--bg-main); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
-
-        .config-block { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
-        .level-slider { width: 100%; margin: 10px 0; -webkit-appearance: none; height: 8px; border-radius: 5px; background: #e0e5f2; }
-        .level-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); cursor: pointer; }
-        .level-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--primary); }
-
-        .btn-group { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
-        .btn-sub { flex: 1; min-width: 50px; padding: 12px; background: var(--bg-main); border: none; border-radius: 10px; font-weight: 700; cursor: pointer; text-align: center; }
-        .btn-sub.active { background: var(--primary); color: white; }
-        .btn-action { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; margin-top: 10px; }
-        
-        /* WERKBLAD STIJLEN */
-        .category-header { background: var(--primary-light); color: var(--primary); padding: 12px 18px; border-radius: 10px; font-size: 16px; font-weight: 800; margin: 24px 0 12px 0; border-left: 5px solid var(--primary); }
-        .som-row { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 12px; }
-        .som-body { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 16px; }
-        .som-vraag { font-size: 15px; font-weight: 700; flex: 1; }
-        .som-input { width: 110px; height: 44px; border-radius: 8px; border: 2px solid var(--border); background: var(--bg-main); font-size: 16px; text-align: center; font-weight: 700; }
-        
-        .som-row.correct { border-color: var(--success); background: #e6fcf5; }
-        .som-row.incorrect { border-color: var(--danger); background: #fff5f5; }
+        :root { --primary: #4318ff; --bg-main: #f4f7fe; --border: #e0e5f2; }
+        body { font-family: sans-serif; background: var(--bg-main); display: flex; justify-content: center; padding: 20px; }
+        .app-window { width: 100%; max-width: 768px; background: white; padding: 20px; border-radius: 20px; }
+        .view { display: none; }
+        .view.active { display: block; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .tile { border: 2px solid var(--border); padding: 15px; border-radius: 15px; cursor: pointer; }
+        .tile.active { border-color: var(--primary); background: #f4f2ff; }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-top: 10px; cursor: pointer; }
+        .som-row { border-bottom: 1px solid var(--border); padding: 10px 0; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
 <div class="app-window">
-    <div class="top-nav">
-        <div>
-            <button class="btn-home" onclick="terugNaarHome()">🏠 Dashboard</button>
-            <span id="appLevelTitle" style="margin-left:10px; font-weight:800;">Groep 4 (Midden)</span>
-        </div>
-        <div class="score-container">
-            <div class="score-badge">🏆 Punten: <span id="xpDisplay">0</span></div>
-            <button class="btn-reset" onclick="resetScoresOnly()">🗑️ reset</button>
-        </div>
-    </div>
-
     <!-- DASHBOARD -->
     <div id="view-dashboard" class="view active">
-        <div class="section-title">1. Kies het Niveau 📊</div>
-        <div class="config-block">
-            <input type="range" min="0" max="3" value="1" class="level-slider" id="levelSlider" oninput="updateNiveauLabel()">
-            <div class="level-labels">
-                <span>Begin 4</span><span>Midden 4</span><span>Groep 5</span><span>Groep 5 / +</span>
-            </div>
+        <h1>Dashboard 📊</h1>
+        <p>Punten: <span id="xpDisplay">0</span></p>
+        
+        <h3>Niveau</h3>
+        <input type="range" id="levelSlider" min="0" max="3" value="1" style="width:100%">
+        
+        <h3>Categorieën</h3>
+        <div class="dashboard-grid" id="categoryTiles">
+            <!-- Tiles worden via JS toegevoegd -->
         </div>
 
-        <div class="section-title">2. Selecteer Categorieën 🎯</div>
-        <div class="dashboard-grid">
-            <div class="tile active" id="tile-splitsen" onclick="toggleTile('splitsen')"><div class="tile-icon">🪵</div><div><h3>Splitsen</h3></div></div>
-            <div class="tile active" id="tile-tafels" onclick="toggleTile('tafels')"><div class="tile-icon">✖️</div><div><h3>Tafels</h3></div></div>
-            <div class="tile active" id="tile-optellen_aftrekken" onclick="toggleTile('optellen_aftrekken')"><div class="tile-icon">➕</div><div><h3>+/- Sommen</h3></div></div>
-            <div class="tile active" id="tile-klokkijken" onclick="toggleTile('klokkijken')"><div class="tile-icon">🕒</div><div><h3>Klok</h3></div></div>
-            <div class="tile active" id="tile-geld" onclick="toggleTile('geld')"><div class="tile-icon">💶</div><div><h3>Geld</h3></div></div>
-            <div class="tile active" id="tile-redactie" onclick="toggleTile('redactie')"><div class="tile-icon">📝</div><div><h3>Redactie</h3></div></div>
-        </div>
-
-        <button class="btn-action" onclick="genereerWerkblad()">Digitaal Oefenblad Openen 🚀</button>
-        <button class="btn-action" style="background:#2563eb;" onclick="genereerPDF()">PDF Downloaden 📄</button>
+        <button class="btn-action" onclick="genereerWerkblad()">Start Oefenblad 🚀</button>
+        <button class="btn-action" style="background:#2563eb;" onclick="genereerPDF()">Download PDF 📄</button>
     </div>
 
-    <!-- WERKBLAD VIEW -->
+    <!-- WERKBLAD -->
     <div id="view-werkblad" class="view">
+        <button onclick="terugNaarHome()">Terug naar Dashboard</button>
         <div id="worksheetContainer"></div>
-        <button class="btn-action" id="btnControleer" onclick="nakijkenWerkblad()">Werkblad Controleren ✔️</button>
-        <button class="btn-action" id="btnNaarScore" style="background:#ff9800; display:none;" onclick="terugNaarHome()">Naar Dashboard 🏠</button>
     </div>
 </div>
 
 <script>
     let state = {
         niveau: 1,
-        selectedCategories: ['splitsen', 'tafels', 'optellen_aftrekken', 'klokkijken', 'geld', 'redactie'],
-        sommenPerOefening: 5,
+        selectedCategories: ['splitsen', 'tafels'],
         sommenData: [],
-        punten: parseInt(localStorage.getItem('rekenapp_punten')) || 0
+        punten: 0
     };
 
-    const categorieMapping = {
-        tafels: { nr: "Tafels", code: "tafels" },
-        splitsen: { nr: "Splitsommen", code: "splitsen" },
-        optellen_aftrekken: { nr: "+/- Sommen", code: "optellen_aftrekken" },
-        klokkijken: { nr: "Klokkijken", code: "klokkijken" },
-        geld: { nr: "Geld tellen", code: "geld" },
-        redactie: { nr: "Redactiesommen", code: "redactie" }
-    };
+    const categories = ['splitsen', 'tafels', 'optellen_aftrekken', 'klokkijken', 'geld', 'redactie'];
 
-    function updateNiveauLabel() {
-        state.niveau = parseInt(document.getElementById('levelSlider').value);
-        const labels = ["Groep 4 (Begin)", "Groep 4 (Midden)", "Groep 5", "Groep 5 / +"];
-        document.getElementById('appLevelTitle').innerText = labels[state.niveau];
+    function init() {
+        const container = document.getElementById('categoryTiles');
+        categories.forEach(cat => {
+            container.innerHTML += `<div class="tile ${state.selectedCategories.includes(cat) ? 'active' : ''}" id="tile-${cat}" onclick="toggleTile('${cat}')">${cat}</div>`;
+        });
     }
 
     function toggleTile(cat) {
-        const tile = document.getElementById(`tile-${cat}`);
         const idx = state.selectedCategories.indexOf(cat);
-        if(idx > -1) { state.selectedCategories.splice(idx, 1); tile.classList.remove('active'); }
-        else { state.selectedCategories.push(cat); tile.classList.add('active'); }
-    }
-
-    // Eenvoudige som-generator voor voorbeeld
-    function bouwSom(cat) {
-        let vraag = "", antwoord = "";
-        if(cat === 'tafels') { let m=Math.floor(Math.random()*9)+2; let t=Math.floor(Math.random()*9)+2; vraag = `${m} x ${t} =`; antwoord = (m*t).toString(); }
-        else { vraag = "1 + 1 ="; antwoord = "2"; }
-        return { cat, vraag, antwoord };
+        if(idx > -1) state.selectedCategories.splice(idx, 1);
+        else state.selectedCategories.push(cat);
+        document.getElementById(`tile-${cat}`).classList.toggle('active');
     }
 
     function genereerWerkblad() {
-        state.sommenData = [];
+        state.sommenData = [{vraag: "2 x 3 =", antwoord: "6"}, {vraag: "5 + 5 =", antwoord: "10"}];
         const container = document.getElementById('worksheetContainer');
-        container.innerHTML = "<h2>Mijn Oefenblad</h2>";
-        state.selectedCategories.forEach(cat => {
-            for(let i=0; i<state.sommenPerOefening; i++) {
-                let s = bouwSom(cat);
-                state.sommenData.push(s);
-                container.innerHTML += `<div class="som-row" id="somrow-${state.sommenData.length-1}"><div class="som-vraag">${s.vraag}</div><input type="text" class="som-input" id="input-${state.sommenData.length-1}"></div>`;
-            }
+        container.innerHTML = "<h2>Oefenblad</h2>";
+        state.sommenData.forEach((s, i) => {
+            container.innerHTML += `<div class="som-row"><span>${s.vraag}</span><input type="text"></div>`;
         });
         document.getElementById('view-dashboard').classList.remove('active');
         document.getElementById('view-werkblad').classList.add('active');
@@ -166,29 +85,16 @@
         document.getElementById('view-werkblad').classList.remove('active');
     }
 
-    // PDF GENERATIE FUNCTIE
     function genereerPDF() {
-        // Zorg dat we data hebben
-        let data = state.sommenData.length > 0 ? state.sommenData : [{cat:'tafels', vraag:'2 x 3 =', antwoord:'6'}];
-        
         let element = document.createElement('div');
-        element.style.padding = "20px";
-        element.innerHTML = `<h1>Rekenwerkblad</h1>`;
-        
-        data.forEach((s, idx) => {
-            element.innerHTML += `<p>${idx+1}. ${s.vraag} ............ (Antwoord: ${s.antwoord})</p>`;
+        element.innerHTML = "<h1>Rekenwerkblad</h1>";
+        state.sommenData.forEach((s, i) => {
+            element.innerHTML += `<p>${i+1}. ${s.vraag} ............</p>`;
         });
-
-        let opt = {
-            margin: 10,
-            filename: 'Rekenwerkblad.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).save();
+        html2pdf().from(element).save('Oefenblad.pdf');
     }
+
+    init();
 </script>
 </body>
 </html>
