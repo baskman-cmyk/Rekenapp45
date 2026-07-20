@@ -238,6 +238,8 @@
                 <div id="historyListContainer"></div>
             </div>
         </div>
+
+        <button class="btn-action" id="btnResetVoortgang" style="background:#dc2626; margin-top:16px;" onclick="resetVoortgang()">🗑️ Reset medailles, statistieken & geschiedenis</button>
     </div>
 
     <!-- WERKBLAD VIEW -->
@@ -291,7 +293,7 @@
         { id: 8, v: "Er zitten {t} vogels gezellig op een tak. Ineens vliegen er {w} geschrokken weg. Hoeveel vogels blijven er op de tak over?", f: (t, w) => t - w },
         { id: 9, v: "Je leest {t} bladzijden in de ochtend en daarna nog eens {w} bladzijden in de middag. Hoeveel pagina's heb je in totaal gelezen?", f: (t, w) => t + w },
         { id: 10, v: "Een grote koekjestrommel bevat {t} koekjes. Je eet er met je vrienden {w} op. Hoeveel koekjes zijn er nu nog over?", f: (t, w) => t - w },
-        { id: 11, v: "Op een leuk verjaardagsfeestje hangen {t} ballonnen. Er knappen er helaas {w} door een spelletje. Hoeveel hangen er noch heel?", f: (t, w) => t - w },
+        { id: 11, v: "Op een leuk verjaardagsfeestje hangen {t} ballonnen. Er knappen er helaas {w} door een spelletje. Hoeveel hangen er nog heel?", f: (t, w) => t - w },
         { id: 12, v: "Een moeilijke legpuzzel heeft in totaal {t} stukjes. Je hebt er al {w} neergelegd. Hoeveel stukjes moet je nog leggen?", f: (t, w) => t - w },
         { id: 13, v: "Je spaart elke week exact {t} stickers voor je album. Hoeveel stickers heb je na {w} weken in totaal verzameld?", f: (t, w) => t * w },
         { id: 14, v: "In een fruitmand liggen al {t} peren. De winkelier legt er {w} verse peren bij. Hoeveel peren liggen er nu bij elkaar?", f: (t, w) => t + w },
@@ -320,6 +322,20 @@
         "Als je al dit geld in je spaarpot stopt, hoeveel zit er dan in?",
         "Bereken het totale bedrag van deze stapel geld."
     ];
+
+    // Bepaalt welk toetsenbord iPad/iPhone moet tonen per categorie.
+    // 'geld' kan een komma nodig hebben (bijv. 12,5) waar het numerieke
+    // toetsenbord geen komma-toets voor heeft, dus die krijgt "text".
+    // Alle andere categorieën verwachten alleen cijfers (en bij klokkijken
+    // wordt de dubbele punt automatisch toegevoegd), dus die krijgen "numeric".
+    function inputModeVoorCategorie(cat) {
+        return cat === 'geld' ? 'text' : 'numeric';
+    }
+
+    // Vaste set attributen om te voorkomen dat iPad-autocorrectie,
+    // automatische hoofdletters of woordsuggesties het ingevulde
+    // antwoord stiekem aanpassen.
+    const ANTI_AUTOCORRECT_ATTRS = 'autocorrect="off" autocapitalize="none" autocomplete="off" spellcheck="false"';
 
     function formatTimeInput(input) {
         let value = input.value.replace(/\D/g, '');
@@ -401,7 +417,7 @@
     function setNiveau(n) {
         state.niveau = n;
         document.getElementById('appLevelTitle').innerText = niveauNamen[state.niveau];
-        
+
         // Update actieve klasse op de niveauknoppen
         for (let i = 0; i <= 3; i++) {
             let btn = document.getElementById(`niv-${i}`);
@@ -412,7 +428,7 @@
         }
 
         // Reset de handmatig geselecteerde tafels als het niveau verandert om fouten te voorkomen
-        state.selectedTafels = []; 
+        state.selectedTafels = [];
         bouwTafelKnoppen();
     }
 
@@ -482,6 +498,20 @@
         }
     }
 
+    // Wist alléén de medailles, statistieken per onderdeel en de geschiedenis.
+    // De verdiende punten blijven staan (gebruik daarvoor de losse "reset punten"-knop).
+    function resetVoortgang() {
+        if(confirm("Weet je zeker dat je ALLE voortgang wilt wissen?\n\nDit verwijdert je medailles, de statistieken per onderdeel én de geschiedenis. Dit kan niet ongedaan worden gemaakt!\n\n(Je punten blijven gewoon staan.)")) {
+            let leegStats = {};
+            Object.keys(categorieMapping).forEach(key => { leegStats[key] = { t: 0, c: 0 }; });
+            state.stats = leegStats;
+            state.history = [];
+            localStorage.setItem('rekenapp_stats_v4', JSON.stringify(state.stats));
+            localStorage.setItem('rekenapp_history', JSON.stringify(state.history));
+            initStats();
+        }
+    }
+
     function genereerKlokHTML(u, m) {
         let uDeg = (u * 30) + (m * 0.5);
         let mDeg = m * 6;
@@ -539,13 +569,242 @@
                         <div class="splits-top">${top}</div>
                         <div class="splits-takken"></div>
                         <div class="splits-bottom">
-                            <div class="splits-box">${linksOnbekend ? `<input type="text" pattern="[0-9]*" inputmode="numeric" id="SPLITSMARKER">` : l}</div>
-                            <div class="splits-box">${linksOnbekend ? r : `<input type="text" pattern="[0-9]*" inputmode="numeric" id="SPLITSMARKER">`}</div>
+                            <div class="splits-box">${linksOnbekend ? `<input type="text" pattern="[0-9]*" inputmode="numeric" autocorrect="off" autocapitalize="none" autocomplete="off" spellcheck="false" id="SPLITSMARKER">` : l}</div>
+                            <div class="splits-box">${linksOnbekend ? r : `<input type="text" pattern="[0-9]*" inputmode="numeric" autocorrect="off" autocapitalize="none" autocomplete="off" spellcheck="false" id="SPLITSMARKER">`}</div>
                         </div>
                     </div>`;
                 vraag = "Vul het ontbrekende getal in de splitsboom in:";
                 break;
+
+            case 'tafels':
+                let gekozenTafelsPool = [...state.selectedTafels];
+                
+                // Fallback: Als er geen specifieke tafels zijn aangeklikt, pakken we de hele reeks van dat niveau
+                if (gekozenTafelsPool.length === 0) {
+                    let start = 2, eind = 10;
+                    if (niv === 1) { start = 5; eind = 15; }
+                    else if (niv >= 2) { start = 8; eind = 20; }
+                    for (let i = start; i <= eind; i++) gekozenTafelsPool.push(i);
+                }
+
+                // Pak een willekeurige tafel uit de selectie
+                let geselecteerdeTafel = gekozenTafelsPool[Math.floor(Math.random() * gekozenTafelsPool.length)];
+                let vermenigvuldiger = Math.floor(Math.random() * 10) + 1; // 1 t/m 10
+                
+                vraag = `${vermenigvuldiger} × ${geselecteerdeTafel} =`;
+                antwoord = (vermenigvuldiger * geselecteerdeTafel).toString();
+                break;
+
+            case 'optellen_aftrekken':
+                let a = Math.floor(Math.random() * 60) + 15;
+                let b = Math.floor(Math.random() * 25) + 2; 
+                vraag = Math.random() > 0.5 ? `${a} + ${b} =` : `${a+b} - ${b} =`;
+                antwoord = Math.random() > 0.5 ? (a+b).toString() : a.toString();
+                break;
+
+            case 'klokkijken':
+                let h, min, combiKey;
+                let klokPogingen = 0;
+                let minutenOpties = [0, 30, 15, 45]; 
+
+                if(niv >= 1) {
+                    minutenOpties = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+                }
+
+                do {
+                    h = Math.floor(Math.random() * 12) + 1;
+                    min = minutenOpties[Math.floor(Math.random() * minutenOpties.length)];
+                    combiKey = `${h}:${min}`;
+                    klokPogingen++;
+                } while (uniekeTijden.includes(combiKey) && klokPogingen < 500);
+
+                uniekeTijden.push(combiKey);
+                customHTML = genereerKlokHTML(h, min);
+                vraag = "Hoe laat is het op deze klok?";
+                extraUitleg = "Typ alleen 4 cijfers. Bijvoorbeeld: 0830 wordt automatisch 08:30";
+                
+                let hStr = h < 10 ? '0' + h : h.toString();
+                let mStr = min < 10 ? '0' + min : min.toString();
+                antwoord = `${hStr}:${mStr}`;
+                break;
+
+            case 'geld':
+                let aantalItems = Math.floor(Math.random() * 8) + 3; 
+                let beschikbareEenheden = [50, 20, 10, 5, 2, 1];
+                
+                if (niv >= 2) beschikbareEenheden.push(0.5);
+
+                let gekozenItems = [];
+                let totaalBedrag = 0;
+
+                for (let i = 0; i < aantalItems; i++) {
+                    let w = beschikbareEenheden[Math.floor(Math.random() * beschikbareEenheden.length)];
+                    gekozenItems.push(w);
+                    totaalBedrag += w;
+                }
+
+                gekozenItems.sort((x, y) => y - x);
+
+                customHTML = bouwGeldHTMLVanItems(gekozenItems);
+                vraag = geldVragenPool[Math.floor(Math.random() * geldVragenPool.length)];
+                antwoord = (Math.round(totaalBedrag * 100) / 100).toString();
+                if(antwoord.includes('.5')) antwoord = antwoord.replace('.', ',');
+                break;
+
+            case 'redactie':
+                let beschikbareOpties = redactiePool.filter(item => !gekozenRedactieIds.includes(item.id));
+                
+                if (beschikbareOpties.length === 0) {
+                    gekozenRedactieIds.length = 0; 
+                    beschikbareOpties = redactiePool;
+                }
+
+                let gekozenVraag = beschikbareOpties[Math.floor(Math.random() * beschikbareOpties.length)];
+                gekozenRedactieIds.push(gekozenVraag.id);
+
+                let tv = Math.floor(Math.random() * 30) + 20;
+                let wv = Math.floor(Math.random() * 12) + 2;
+                vraag = gekozenVraag.v.replace("{t}", tv).replace("{w}", wv);
+                antwoord = gekozenVraag.f(tv, wv).toString();
+                break;
         }
+
+        return { cat, vraag, antwoord, customHTML, extraUitleg };
+    }
+
+    function genereerWerkblad() {
+        if(state.selectedCategories.length === 0) {
+            alert("Selecteer eerst minstens één categorie om te kunnen oefenen!");
+            return;
+        }
+        state.sommenData = [];
+        let uniekeTijden = [];
+        let gekozenRedactieIds = [];
+
+        const container = document.getElementById('worksheetContainer');
+        container.innerHTML = `<h2 style="margin-bottom:15px;">Mijn Oefenblad (${niveauNamen[state.niveau]})</h2>`;
+
+        state.selectedCategories.forEach(cat => {
+            let block = document.createElement('div');
+            block.innerHTML = `<div class="category-header">${categorieMapping[cat] ? categorieMapping[cat].nr : cat.toUpperCase()}</div>`;
+            
+            for(let i=0; i<state.sommenPerOefening; i++) {
+                let s = bouwSom(cat, uniekeTijden, gekozenRedactieIds);
+                let idx = state.sommenData.length;
+                state.sommenData.push(s);
+
+                let row = document.createElement('div');
+                row.className = "som-row";
+                row.id = `somrow-${idx}`;
+
+                if(s.cat === 'splitsen') {
+                    let splitsHTML = s.customHTML.replace(/id="SPLITSMARKER"/g, `id="input-${idx}"`);
+                    row.innerHTML = (s.vraag ? `<div class="som-vraag" style="margin-bottom:4px;">${s.vraag}</div>` : '') + splitsHTML;
+                } else {
+                    let eventHandler = s.cat === 'klokkijken' ? 'oninput="formatTimeInput(this)" placeholder="00:00" maxlength="5"' : '';
+                    let inputMode = inputModeVoorCategorie(s.cat);
+                    row.innerHTML = `
+                        <div style="display:flex; flex-direction:column; width:100%;">
+                            <div style="display:flex; align-items:center; width:100%;">
+                                ${s.customHTML ? s.customHTML : ''}
+                                <div class="som-body">
+                                    <div class="som-vraag">
+                                        ${s.vraag}
+                                        ${s.extraUitleg ? `<div class="som-uitleg">${s.extraUitleg}</div>` : ''}
+                                    </div>
+                                    <input type="text" class="som-input" id="input-${idx}" inputmode="${inputMode}" ${ANTI_AUTOCORRECT_ATTRS} ${eventHandler}>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+                block.appendChild(row);
+            }
+            container.appendChild(block);
+        });
+
+        document.getElementById('btnControleer').style.display = "block";
+        document.getElementById('btnNaarScore').style.display = "none";
+        switchView('werkblad');
+    }
+
+    function nakijkenWerkblad() {
+        let goed = 0;
+        let perCatScores = {};
+        
+        state.sommenData.forEach((s, idx) => {
+            let inp = document.getElementById(`input-${idx}`).value.trim().toLowerCase().replace('.', ',');
+            let target = s.antwoord.toLowerCase().replace('.', ',');
+            let isCorrect;
+            if (s.cat === 'klokkijken') {
+                // Iets soepeler nakijken voor klokkijken: "830" en "8:30" worden
+                // ook goedgekeurd naast de nette vorm "08:30".
+                let inpCijfers = inp.replace(/\D/g, '').padStart(4, '0');
+                let targetCijfers = target.replace(/\D/g, '').padStart(4, '0');
+                isCorrect = (inpCijfers === targetCijfers);
+            } else {
+                isCorrect = (inp === target);
+            }
+            
+            if(!perCatScores[s.cat]) perCatScores[s.cat] = { t: 0, c: 0 };
+            perCatScores[s.cat].t++;
+
+            const row = document.getElementById(`somrow-${idx}`);
+            if(isCorrect) {
+                goed++;
+                perCatScores[s.cat].c++;
+                row.className = "som-row correct";
+            } else {
+                row.className = "som-row incorrect";
+                let inputEl = document.getElementById(`input-${idx}`);
+                inputEl.style.borderColor = "var(--danger)";
+                let hint = document.createElement('div');
+                hint.style.color = "var(--danger)";
+                hint.style.fontSize = "12px";
+                hint.style.fontWeight = "bold";
+                hint.innerText = s.cat === 'geld' ? `Goed: €${s.antwoord}` : `Goed: ${s.antwoord}`;
+                inputEl.parentNode.appendChild(hint);
+            }
+        });
+
+        state.punten += goed;
+        localStorage.setItem('rekenapp_punten', state.punten);
+
+        Object.keys(perCatScores).forEach(cat => {
+            if(!state.stats[cat]) state.stats[cat] = { t: 0, c: 0 };
+            state.stats[cat].t += perCatScores[cat].t;
+            state.stats[cat].c += perCatScores[cat].c;
+        });
+        localStorage.setItem('rekenapp_stats_v4', JSON.stringify(state.stats));
+
+        let vandaag = new Date().toLocaleDateString('nl-NL');
+        state.history.push({
+            datum: vandaag,
+            score: `${goed} / ${state.sommenData.length}`,
+            nivName: niveauNamen[state.niveau]
+        });
+        // Voorkom dat de geschiedenis (en daarmee de opslag) onbeperkt blijft groeien.
+        const HISTORY_LIMIT = 100;
+        if (state.history.length > HISTORY_LIMIT) {
+            state.history = state.history.slice(state.history.length - HISTORY_LIMIT);
+        }
+        localStorage.setItem('rekenapp_history', JSON.stringify(state.history));
+
+        initStats();
+
+        document.getElementById('btnControleer').style.display = "none";
+        document.getElementById('btnNaarScore').style.display = "block";
+        
+        alert(`Goed gedaan! Je hebt ${goed} van de ${state.sommenData.length} sommen goed gemaakt. Dat levert je ${goed} extra punt(en) op! 🌟`);
+    }
+
+    function switchView(viewName) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(`view-${viewName}`).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    function terugNaarHome() {
+        switchView('dashboard');
     }
 </script>
 </body>
